@@ -14,7 +14,10 @@ Direct `ILogger<T>` injection via the existing DI container. Standard idiomatic 
 - `Microsoft.Extensions.Logging`
 - `Microsoft.Extensions.Logging.Console`
 
-Infrastructure and Application projects need no new packages — `ILogger<T>` is transitively available via EF Core's dependency on `Microsoft.Extensions.Logging.Abstractions`.
+**Application project:**
+- `Microsoft.Extensions.Logging.Abstractions` — explicit reference needed since Application does not depend on Infrastructure or EF Core (correct per Onion architecture).
+
+Infrastructure needs no new packages — `ILogger<T>` is transitively available via EF Core's dependency on `Microsoft.Extensions.Logging.Abstractions`.
 
 **DI registration in `App.ConfigureServices`:**
 
@@ -49,7 +52,8 @@ Called at the top of `OnStartup`, guarded by `#if DEBUG`.
 
 **`BazaarPlannerImporter`:**
 - Info: HTTP fetch start per resource (items, skills, monsters)
-- Error: HTTP failures, JSON parse failures (replacing the current silent `catch` in `ParseJsArray`)
+- Error: HTTP failures, JSON parse failures
+- Note: `ParseJsArray` is a `static` method and cannot access an instance `_logger`. Logging for JSON parse failures moves to the calling instance methods (`FetchItemsAsync`, `FetchSkillsAsync`, `FetchMonstersAsync`) which wrap the `ParseJsArray` call in a try/catch. `ParseJsArray` itself remains static and unchanged (it still throws on error instead of silently returning an empty list — the caller catches and logs).
 
 ### Application Layer
 
@@ -71,9 +75,6 @@ Called at the top of `OnStartup`, guarded by `#if DEBUG`.
 **`EncounterService`:**
 - Info: encounter lookups
 
-**`GameSessionService`:**
-- Info: hero/day selection changes
-
 ### WPF Layer
 
 **`App`:**
@@ -85,6 +86,7 @@ Called at the top of `OnStartup`, guarded by `#if DEBUG`.
 - **Domain entities** — no DI, pure logic
 - **Repositories** — EF Core already logs queries at Debug level via its own `ILogger` integration
 - **ViewModels** — UI actions are visible on screen; logging would be noise
+- **`GameSessionService`** — trivial synchronous one-liners (set hero, advance day, reset); state changes are visible in the UI
 
 ## Log Message Conventions
 
@@ -103,17 +105,32 @@ _logger.LogInformation($"Importing {items.Count} items from BazaarPlanner");
 - `LogWarning` — expected-but-noteworthy conditions (entity not found, empty results)
 - `LogError(exception, ...)` — caught exceptions that were previously swallowed
 
-**No control flow changes.** Logging is observability only. Existing return values and error handling remain unchanged. The one exception: `BazaarPlannerImporter.ParseJsArray`'s bare `catch` block gets the exception logged but still returns an empty list.
+**No control flow changes.** Logging is observability only. Existing return values and error handling remain unchanged.
+
+## Test Convention
+
+Adding `ILogger<T>` to constructors breaks existing tests. Use `NullLogger<T>.Instance` (from `Microsoft.Extensions.Logging.Abstractions`) in tests — we don't assert on log output.
+
+The test project may need an explicit `Microsoft.Extensions.Logging.Abstractions` package reference if it's not already transitively available.
 
 ## Files Modified
 
+### Source
 1. `src/BazaarOverlay.WPF/BazaarOverlay.WPF.csproj` — add logging packages
 2. `src/BazaarOverlay.WPF/App.xaml.cs` — register logging, allocate debug console
-3. `src/BazaarOverlay.Infrastructure/DataImport/DataImportService.cs` — add `ILogger<DataImportService>`
-4. `src/BazaarOverlay.Infrastructure/DataImport/BazaarPlannerImporter.cs` — add `ILogger<BazaarPlannerImporter>`
-5. `src/BazaarOverlay.Application/Services/MonsterEncounterService.cs` — add `ILogger<MonsterEncounterService>`
-6. `src/BazaarOverlay.Application/Services/ItemInfoService.cs` — add `ILogger<ItemInfoService>`
-7. `src/BazaarOverlay.Application/Services/SkillInfoService.cs` — add `ILogger<SkillInfoService>`
-8. `src/BazaarOverlay.Application/Services/ShopService.cs` — add `ILogger<ShopService>`
-9. `src/BazaarOverlay.Application/Services/EncounterService.cs` — add `ILogger<EncounterService>`
-10. `src/BazaarOverlay.Application/Services/GameSessionService.cs` — add `ILogger<GameSessionService>`
+3. `src/BazaarOverlay.Application/BazaarOverlay.Application.csproj` — add `Microsoft.Extensions.Logging.Abstractions` package
+4. `src/BazaarOverlay.Infrastructure/DataImport/DataImportService.cs` — add `ILogger<DataImportService>`
+5. `src/BazaarOverlay.Infrastructure/DataImport/BazaarPlannerImporter.cs` — add `ILogger<BazaarPlannerImporter>`
+6. `src/BazaarOverlay.Application/Services/MonsterEncounterService.cs` — add `ILogger<MonsterEncounterService>`
+7. `src/BazaarOverlay.Application/Services/ItemInfoService.cs` — add `ILogger<ItemInfoService>`
+8. `src/BazaarOverlay.Application/Services/SkillInfoService.cs` — add `ILogger<SkillInfoService>`
+9. `src/BazaarOverlay.Application/Services/ShopService.cs` — add `ILogger<ShopService>`
+10. `src/BazaarOverlay.Application/Services/EncounterService.cs` — add `ILogger<EncounterService>`
+
+### Tests
+11. `tests/BazaarOverlay.Tests/Application/MonsterEncounterServiceTests.cs` — pass `NullLogger<T>.Instance`
+12. `tests/BazaarOverlay.Tests/Application/ItemInfoServiceTests.cs` — pass `NullLogger<T>.Instance`
+13. `tests/BazaarOverlay.Tests/Application/SkillInfoServiceTests.cs` — pass `NullLogger<T>.Instance`
+14. `tests/BazaarOverlay.Tests/Application/ShopServiceTests.cs` — pass `NullLogger<T>.Instance`
+15. `tests/BazaarOverlay.Tests/Application/EncounterServiceTests.cs` — pass `NullLogger<T>.Instance`
+16. `tests/BazaarOverlay.Tests/Infrastructure/DataImportTests.cs` — pass `NullLogger<T>.Instance`
