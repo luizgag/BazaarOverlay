@@ -52,8 +52,9 @@ Called at the top of `OnStartup`, guarded by `#if DEBUG`.
 
 **`BazaarPlannerImporter`:**
 - Info: HTTP fetch start per resource (items, skills, monsters)
-- Error: HTTP failures, JSON parse failures
-- Note: `ParseJsArray` is a `static` method and cannot access an instance `_logger`. Logging for JSON parse failures moves to the calling instance methods (`FetchItemsAsync`, `FetchSkillsAsync`, `FetchMonstersAsync`) which wrap the `ParseJsArray` call in a try/catch. `ParseJsArray` itself remains static and unchanged (it still throws on error instead of silently returning an empty list — the caller catches and logs).
+- Error: HTTP failures (from `GetStringAsync`, which throws on network/HTTP errors)
+- Warning: empty parse results (when `ParseJsArray` returns an empty list from non-empty input)
+- Note: `ParseJsArray` is `static` and silently returns an empty list on failure — it does not throw. It remains unchanged. Callers wrap the `GetStringAsync` call in try/catch (for HTTP errors) and log a warning when `ParseJsArray` returns an empty list.
 
 ### Application Layer
 
