@@ -1,0 +1,275 @@
+<Window x:Class="BazaarOverlay.WPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:BazaarOverlay.WPF.ViewModels"
+        mc:Ignorable="d"
+        Title="The Bazaar Overlay"
+        Width="320" Height="700"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Topmost="True"
+        Background="Transparent"
+        ResizeMode="CanResizeWithGrip"
+        d:DataContext="{d:DesignInstance Type=vm:MainViewModel}">
+
+    <Border Background="#E0202030" CornerRadius="8" Padding="12" BorderBrush="#404050" BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header: Title + Hero + Day -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,12">
+                <TextBlock Text="The Bazaar Overlay"
+                           FontSize="18" FontWeight="Bold"
+                           Foreground="#FFD4A0" Margin="0,0,0,8"
+                           MouseLeftButtonDown="TitleBar_MouseLeftButtonDown"/>
+
+                <Grid Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Hero:" Foreground="#CCCCCC" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <ComboBox Grid.Column="1"
+                              ItemsSource="{Binding Heroes}"
+                              SelectedItem="{Binding SelectedHero}"
+                              Background="#303040" Foreground="White"/>
+                </Grid>
+
+                <Grid Margin="0,4,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Foreground="#CCCCCC" VerticalAlignment="Center">
+                        <Run Text="Day: "/>
+                        <Run Text="{Binding CurrentDay, Mode=OneWay}" FontWeight="Bold" Foreground="White"/>
+                    </TextBlock>
+                    <Button Grid.Column="1" Content="Advance Day"
+                            Command="{Binding AdvanceDayCommand}"
+                            Margin="12,0,0,0" Padding="8,4"
+                            Background="#404060" Foreground="White" BorderBrush="#505070"/>
+                </Grid>
+            </StackPanel>
+
+            <Separator Grid.Row="1" Background="#404050"/>
+
+            <!-- Content Area -->
+            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="0,8,0,0">
+                <StackPanel IsEnabled="{Binding IsHeroSelected}">
+                    <TextBlock Text="Encounter Search" FontWeight="SemiBold"
+                               Foreground="#AAAACC" Margin="0,0,0,6"/>
+                    <TextBox Text="{Binding MonsterEncounter.SearchText, UpdateSourceTrigger=PropertyChanged}"
+                             Background="#303040" Foreground="White" Padding="6,4"
+                             BorderBrush="#505070"/>
+
+                    <!-- Search Results List -->
+                    <ListBox ItemsSource="{Binding MonsterEncounter.SearchResults}"
+                             SelectedItem="{Binding MonsterEncounter.SelectedEncounter}"
+                             Background="Transparent" Foreground="White"
+                             BorderThickness="0" Margin="0,6,0,0"
+                             MaxHeight="120">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <Run Text="{Binding Name, Mode=OneWay}" FontWeight="Bold"/>
+                                    <Run Text=" [" Foreground="#888"/><Run Text="{Binding Type, Mode=OneWay}" Foreground="#88AACC"/><Run Text="]" Foreground="#888"/>
+                                    <Run Text=" (" Foreground="#888"/><Run Text="{Binding Rarity, Mode=OneWay}" Foreground="#CCAA44"/><Run Text=")" Foreground="#888"/>
+                                </TextBlock>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <!-- Selected Encounter Details -->
+                    <Border Background="#282838" CornerRadius="6" Padding="10" Margin="0,8,0,0"
+                            Visibility="{Binding MonsterEncounter.SelectedEncounter, Converter={StaticResource NullToCollapsedConverter}}">
+                        <StackPanel>
+                            <TextBlock FontSize="14" FontWeight="Bold" Foreground="White"
+                                       Text="{Binding MonsterEncounter.SelectedEncounter.Name, Mode=OneWay}"/>
+                            <TextBlock Foreground="#888" Text="{Binding MonsterEncounter.SelectedEncounter.Description, Mode=OneWay}" Margin="0,2,0,0"
+                                       TextWrapping="Wrap"/>
+
+                            <!-- Monster Details -->
+                            <StackPanel Visibility="{Binding MonsterEncounter.SelectedEncounter.MonsterDetails, Converter={StaticResource NullToCollapsedConverter}}">
+                                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                    <TextBlock Foreground="#888" Text="HP: "/>
+                                    <TextBlock Foreground="#FF6666" Text="{Binding MonsterEncounter.SelectedEncounter.MonsterDetails.Health, Mode=OneWay}"/>
+                                    <TextBlock Foreground="#888" Text="  Day: " Margin="12,0,0,0"/>
+                                    <TextBlock Foreground="White" Text="{Binding MonsterEncounter.SelectedEncounter.MonsterDetails.FirstDay, Mode=OneWay}"/>
+                                </StackPanel>
+                                <TextBlock Text="Item Drops:" Foreground="#88AACC" FontWeight="SemiBold" Margin="0,8,0,2"/>
+                                <ItemsControl ItemsSource="{Binding MonsterEncounter.SelectedEncounter.MonsterDetails.ItemDrops}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Foreground="#CCCCCC" Margin="8,1,0,1">
+                                                <Run Text="- "/><Run Text="{Binding Name, Mode=OneWay}"/>
+                                                <Run Text=" (" Foreground="#666"/><Run Text="{Binding MinimumRarity, Mode=OneWay}" Foreground="#CCAA44"/><Run Text=")" Foreground="#666"/>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock Text="Skill Drops:" Foreground="#88CCAA" FontWeight="SemiBold" Margin="0,8,0,2"/>
+                                <ItemsControl ItemsSource="{Binding MonsterEncounter.SelectedEncounter.MonsterDetails.SkillDrops}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Foreground="#CCCCCC" Margin="8,1,0,1">
+                                                <Run Text="- "/><Run Text="{Binding Name, Mode=OneWay}"/>
+                                                <Run Text=" (" Foreground="#666"/><Run Text="{Binding MinimumRarity, Mode=OneWay}" Foreground="#CCAA44"/><Run Text=")" Foreground="#666"/>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+
+                            <!-- Shop Details -->
+                            <StackPanel Visibility="{Binding MonsterEncounter.SelectedEncounter.ShopDetails, Converter={StaticResource NullToCollapsedConverter}}">
+                                <TextBlock Text="Available Items:" Foreground="#CCAA44" FontWeight="SemiBold" Margin="0,8,0,2"/>
+                                <ItemsControl ItemsSource="{Binding MonsterEncounter.SelectedEncounter.ShopDetails.AvailableItems}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Foreground="#CCCCCC" Margin="8,1,0,1">
+                                                <Run Text="- "/><Run Text="{Binding Name, Mode=OneWay}"/>
+                                                <Run Text=" (" Foreground="#666"/><Run Text="{Binding Size, Mode=OneWay}"/><Run Text=", " Foreground="#666"/><Run Text="{Binding MinimumRarity, Mode=OneWay}" Foreground="#CCAA44"/><Run Text=")" Foreground="#666"/>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+
+                            <!-- Event Details -->
+                            <StackPanel Visibility="{Binding MonsterEncounter.SelectedEncounter.EventDetails, Converter={StaticResource NullToCollapsedConverter}}">
+                                <TextBlock Text="Reward Items:" Foreground="#88AACC" FontWeight="SemiBold" Margin="0,8,0,2"/>
+                                <ItemsControl ItemsSource="{Binding MonsterEncounter.SelectedEncounter.EventDetails.RewardItems}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Foreground="#CCCCCC" Margin="8,1,0,1">
+                                                <Run Text="- "/><Run Text="{Binding Name, Mode=OneWay}"/>
+                                                <Run Text=" (" Foreground="#666"/><Run Text="{Binding MinimumRarity, Mode=OneWay}" Foreground="#CCAA44"/><Run Text=")" Foreground="#666"/>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock Text="Reward Skills:" Foreground="#88CCAA" FontWeight="SemiBold" Margin="0,8,0,2"/>
+                                <ItemsControl ItemsSource="{Binding MonsterEncounter.SelectedEncounter.EventDetails.RewardSkills}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Foreground="#CCCCCC" Margin="8,1,0,1">
+                                                <Run Text="- "/><Run Text="{Binding Name, Mode=OneWay}"/>
+                                                <Run Text=" (" Foreground="#666"/><Run Text="{Binding MinimumRarity, Mode=OneWay}" Foreground="#CCAA44"/><Run Text=")" Foreground="#666"/>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    <!-- Item/Skill Info Section -->
+                    <Separator Background="#404050" Margin="0,12,0,8"/>
+                    <TextBlock Text="Item / Skill Lookup" FontWeight="SemiBold"
+                               Foreground="#AAAACC" Margin="0,0,0,6"/>
+                    <TextBox Text="{Binding ItemSkillInfo.SearchText, UpdateSourceTrigger=PropertyChanged}"
+                             Background="#303040" Foreground="White" Padding="6,4"
+                             BorderBrush="#505070"/>
+
+                    <ListBox ItemsSource="{Binding ItemSkillInfo.SearchResults}"
+                             Background="Transparent" Foreground="White"
+                             BorderThickness="0" Margin="0,6,0,0"
+                             MaxHeight="120"
+                             SelectionChanged="ItemSkillList_SelectionChanged">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" Foreground="#CCCCCC"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <!-- Item Details -->
+                    <Border Background="#282838" CornerRadius="6" Padding="10" Margin="0,8,0,0"
+                            Visibility="{Binding ItemSkillInfo.SelectedItem, Converter={StaticResource NullToCollapsedConverter}}">
+                        <StackPanel>
+                            <TextBlock FontSize="14" FontWeight="Bold" Foreground="White"
+                                       Text="{Binding ItemSkillInfo.SelectedItem.Name, Mode=OneWay}"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                <TextBlock Foreground="#888" Text="Size: "/>
+                                <TextBlock Foreground="White" Text="{Binding ItemSkillInfo.SelectedItem.Size, Mode=OneWay}"/>
+                                <TextBlock Foreground="#888" Text="  CD: " Margin="12,0,0,0"/>
+                                <TextBlock Foreground="White" Text="{Binding ItemSkillInfo.SelectedItem.Cooldown, Mode=OneWay, StringFormat={}{0}s}"/>
+                                <TextBlock Foreground="#888" Text="  Min: " Margin="12,0,0,0"/>
+                                <TextBlock Foreground="#CCAA44" Text="{Binding ItemSkillInfo.SelectedItem.MinimumRarity, Mode=OneWay}"/>
+                            </StackPanel>
+
+                            <TextBlock Text="Tier Values:" Foreground="#88AACC" FontWeight="SemiBold" Margin="0,8,0,2"/>
+                            <ItemsControl ItemsSource="{Binding ItemSkillInfo.SelectedItem.TierValues}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Foreground="#CCCCCC" Margin="8,1,0,1">
+                                            <Run Text="{Binding Rarity, Mode=OneWay}" Foreground="#CCAA44" FontWeight="SemiBold"/>
+                                            <Run Text=": "/>
+                                            <Run Text="{Binding EffectDescription, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <TextBlock Text="Enchantments:" Foreground="#CC88AA" FontWeight="SemiBold" Margin="0,8,0,2"/>
+                            <ItemsControl ItemsSource="{Binding ItemSkillInfo.SelectedItem.Enchantments}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Foreground="#CCCCCC" Margin="8,1,0,1">
+                                            <Run Text="{Binding EnchantmentName, Mode=OneWay}" FontWeight="SemiBold" Foreground="#CC88AA"/>
+                                            <Run Text=": "/>
+                                            <Run Text="{Binding EffectDescription, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Skill Details -->
+                    <Border Background="#282838" CornerRadius="6" Padding="10" Margin="0,8,0,0"
+                            Visibility="{Binding ItemSkillInfo.SelectedSkill, Converter={StaticResource NullToCollapsedConverter}}">
+                        <StackPanel>
+                            <TextBlock FontSize="14" FontWeight="Bold" Foreground="White"
+                                       Text="{Binding ItemSkillInfo.SelectedSkill.Name, Mode=OneWay}"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                <TextBlock Foreground="#888" Text="Min: "/>
+                                <TextBlock Foreground="#CCAA44" Text="{Binding ItemSkillInfo.SelectedSkill.MinimumRarity, Mode=OneWay}"/>
+                            </StackPanel>
+
+                            <TextBlock Text="Tier Values:" Foreground="#88CCAA" FontWeight="SemiBold" Margin="0,8,0,2"/>
+                            <ItemsControl ItemsSource="{Binding ItemSkillInfo.SelectedSkill.TierValues}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Foreground="#CCCCCC" Margin="8,1,0,1">
+                                            <Run Text="{Binding Rarity, Mode=OneWay}" Foreground="#CCAA44" FontWeight="SemiBold"/>
+                                            <Run Text=": "/>
+                                            <Run Text="{Binding EffectDescription, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+                    <!-- Download Data Section -->
+                    <Separator Background="#404050" Margin="0,12,0,8"/>
+                    <Button Content="Download Data"
+                            Command="{Binding DownloadDataCommand}"
+                            Padding="12,6" HorizontalAlignment="Stretch"
+                            Background="#405060" Foreground="White" BorderBrush="#506070"
+                            FontWeight="SemiBold"
+                            IsEnabled="{Binding IsImporting, Converter={StaticResource InverseBoolConverter}}"/>
+                    <TextBlock Text="{Binding ImportStatus}"
+                               Foreground="#88AACC" FontSize="11" Margin="0,4,0,0"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Border>
+</Window>

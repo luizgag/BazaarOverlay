@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/BazaarOverlay.Application/BazaarOverlay.Application.csproj" />
+    <Project Path="src/BazaarOverlay.Domain/BazaarOverlay.Domain.csproj" />
+    <Project Path="src/BazaarOverlay.Infrastructure/BazaarOverlay.Infrastructure.csproj" />
+    <Project Path="src/BazaarOverlay.WPF/BazaarOverlay.WPF.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/BazaarOverlay.Tests/BazaarOverlay.Tests.csproj" />
+  </Folder>
+</Solution>
