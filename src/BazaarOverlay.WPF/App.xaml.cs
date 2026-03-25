@@ -84,6 +84,7 @@ public partial class App : System.Windows.Application
         {
             builder.AddConsole();
             builder.SetMinimumLevel(LogLevel.Information);
+            builder.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning);
         });
         services.AddTransient<BazaarPlannerImporter>();
 
