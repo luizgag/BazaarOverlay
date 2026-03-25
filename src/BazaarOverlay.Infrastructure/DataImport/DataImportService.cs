@@ -49,12 +49,18 @@ public class DataImportService : IDataImportService
 
         using var stream = assembly.GetManifestResourceStream(resourceName);
         if (stream is null)
+        {
+            _logger.LogWarning("Embedded resource '{ResourceName}' not found", resourceName);
             return;
+        }
 
         var entries = await JsonSerializer.DeserializeAsync<List<RarityDayEntry>>(stream,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         if (entries is null)
+        {
+            _logger.LogWarning("Failed to deserialize rarity probability data from embedded resource");
             return;
+        }
 
         foreach (var entry in entries)
         {
@@ -111,6 +117,8 @@ public class DataImportService : IDataImportService
     private async Task ImportItemsAsync(List<BazaarPlannerItem> bpItems)
     {
         var existingHeroes = await _context.Heroes.ToDictionaryAsync(h => h.Name, StringComparer.OrdinalIgnoreCase);
+        var added = 0;
+        var skipped = 0;
 
         foreach (var bp in bpItems)
         {
@@ -118,7 +126,10 @@ public class DataImportService : IDataImportService
                 continue;
 
             if (await _context.Items.AnyAsync(i => i.Name == bp.Name))
+            {
+                skipped++;
                 continue;
+            }
 
             var tags = bp.Tags ?? [];
             var heroTags = tags.Where(t => HeroNames.Contains(t)).ToList();
@@ -149,14 +160,19 @@ public class DataImportService : IDataImportService
             }
 
             _context.Items.Add(item);
+            added++;
         }
 
         await _context.SaveChangesAsync();
+        _logger.LogInformation("Imported {Added} items ({Skipped} skipped, {Total} total)",
+            added, skipped, bpItems.Count);
     }
 
     private async Task ImportSkillsAsync(List<BazaarPlannerSkill> bpSkills)
     {
         var existingHeroes = await _context.Heroes.ToDictionaryAsync(h => h.Name, StringComparer.OrdinalIgnoreCase);
+        var added = 0;
+        var skipped = 0;
 
         foreach (var bp in bpSkills)
         {
@@ -164,7 +180,10 @@ public class DataImportService : IDataImportService
                 continue;
 
             if (await _context.Skills.AnyAsync(s => s.Name == bp.Name))
+            {
+                skipped++;
                 continue;
+            }
 
             var tags = bp.Tags ?? [];
             var heroTags = tags.Where(t => HeroNames.Contains(t)).ToList();
@@ -191,20 +210,29 @@ public class DataImportService : IDataImportService
             }
 
             _context.Skills.Add(skill);
+            added++;
         }
 
         await _context.SaveChangesAsync();
+        _logger.LogInformation("Imported {Added} skills ({Skipped} skipped, {Total} total)",
+            added, skipped, bpSkills.Count);
     }
 
     private async Task ImportMonstersAsync(List<BazaarPlannerMonster> bpMonsters)
     {
+        var added = 0;
+        var skipped = 0;
+
         foreach (var bp in bpMonsters)
         {
             if (string.IsNullOrWhiteSpace(bp.Name))
                 continue;
 
             if (await _context.Monsters.AnyAsync(m => m.Name == bp.Name))
+            {
+                skipped++;
                 continue;
+            }
 
             var health = bp.Health ?? 100;
             var day = bp.Day ?? 1;
@@ -218,6 +246,9 @@ public class DataImportService : IDataImportService
                     var item = await _context.Items.FirstOrDefaultAsync(i => i.Name == entry.Name);
                     if (item is not null)
                         monster.DropItems.Add(item);
+                    else
+                        _logger.LogWarning("Monster '{MonsterName}' references unknown item '{ItemName}'",
+                            bp.Name, entry.Name);
                 }
             }
 
@@ -228,13 +259,19 @@ public class DataImportService : IDataImportService
                     var skill = await _context.Skills.FirstOrDefaultAsync(s => s.Name == entry.Name);
                     if (skill is not null)
                         monster.DropSkills.Add(skill);
+                    else
+                        _logger.LogWarning("Monster '{MonsterName}' references unknown skill '{SkillName}'",
+                            bp.Name, entry.Name);
                 }
             }
 
             _context.Monsters.Add(monster);
+            added++;
         }
 
         await _context.SaveChangesAsync();
+        _logger.LogInformation("Imported {Added} monsters ({Skipped} skipped, {Total} total)",
+            added, skipped, bpMonsters.Count);
     }
 
     private async Task SeedEnchantmentsAsync()

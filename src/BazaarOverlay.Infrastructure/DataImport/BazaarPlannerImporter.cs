@@ -1,4 +1,6 @@
+using System.Globalization;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 
@@ -32,33 +34,57 @@ public partial class BazaarPlannerImporter
 
     public async Task<List<BazaarPlannerItem>> FetchItemsAsync()
     {
-        _logger.LogInformation("Fetching items from BazaarPlanner...");
+        _logger.LogInformation("Fetching items from {Url}", $"{BaseUrl}items.js");
         var js = await _httpClient.GetStringAsync($"{BaseUrl}items.js");
-        var items = ParseJsExport<BazaarPlannerItem>(js);
-        if (items.Count == 0 && js.Length > 0)
-            _logger.LogWarning("BazaarPlanner items.js returned content but parsed to 0 items");
+        if (js.Length == 0)
+        {
+            _logger.LogWarning("BazaarPlanner items.js returned empty response");
+            return [];
+        }
+        _logger.LogDebug("items.js response: {Length} bytes, preview: {Preview}",
+            js.Length, js[..Math.Min(200, js.Length)]);
+        var items = ParseJsExport<BazaarPlannerItem>(js, _logger);
+        if (items.Count == 0)
+            _logger.LogWarning("BazaarPlanner items.js returned content ({Length} bytes) but parsed to 0 items",
+                js.Length);
         _logger.LogInformation("Fetched {Count} items from BazaarPlanner", items.Count);
         return items;
     }
 
     public async Task<List<BazaarPlannerMonster>> FetchMonstersAsync()
     {
-        _logger.LogInformation("Fetching monsters from BazaarPlanner...");
+        _logger.LogInformation("Fetching monsters from {Url}", $"{BaseUrl}monsters.js");
         var js = await _httpClient.GetStringAsync($"{BaseUrl}monsters.js");
-        var monsters = ParseJsExport<BazaarPlannerMonster>(js);
-        if (monsters.Count == 0 && js.Length > 0)
-            _logger.LogWarning("BazaarPlanner monsters.js returned content but parsed to 0 monsters");
+        if (js.Length == 0)
+        {
+            _logger.LogWarning("BazaarPlanner monsters.js returned empty response");
+            return [];
+        }
+        _logger.LogDebug("monsters.js response: {Length} bytes, preview: {Preview}",
+            js.Length, js[..Math.Min(200, js.Length)]);
+        var monsters = ParseJsExport<BazaarPlannerMonster>(js, _logger);
+        if (monsters.Count == 0)
+            _logger.LogWarning("BazaarPlanner monsters.js returned content ({Length} bytes) but parsed to 0 monsters",
+                js.Length);
         _logger.LogInformation("Fetched {Count} monsters from BazaarPlanner", monsters.Count);
         return monsters;
     }
 
     public async Task<List<BazaarPlannerSkill>> FetchSkillsAsync()
     {
-        _logger.LogInformation("Fetching skills from BazaarPlanner...");
+        _logger.LogInformation("Fetching skills from {Url}", $"{BaseUrl}skills.js");
         var js = await _httpClient.GetStringAsync($"{BaseUrl}skills.js");
-        var skills = ParseJsExport<BazaarPlannerSkill>(js);
-        if (skills.Count == 0 && js.Length > 0)
-            _logger.LogWarning("BazaarPlanner skills.js returned content but parsed to 0 skills");
+        if (js.Length == 0)
+        {
+            _logger.LogWarning("BazaarPlanner skills.js returned empty response");
+            return [];
+        }
+        _logger.LogDebug("skills.js response: {Length} bytes, preview: {Preview}",
+            js.Length, js[..Math.Min(200, js.Length)]);
+        var skills = ParseJsExport<BazaarPlannerSkill>(js, _logger);
+        if (skills.Count == 0)
+            _logger.LogWarning("BazaarPlanner skills.js returned content ({Length} bytes) but parsed to 0 skills",
+                js.Length);
         _logger.LogInformation("Fetched {Count} skills from BazaarPlanner", skills.Count);
         return skills;
     }
@@ -66,22 +92,45 @@ public partial class BazaarPlannerImporter
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
-        AllowTrailingCommas = true
+        AllowTrailingCommas = true,
+        Converters = { new NumberToStringConverter() }
     };
 
-    public static List<T> ParseJsExport<T>(string jsContent)
+    private class NumberToStringConverter : JsonConverter<string?>
+    {
+        public override string? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            return reader.TokenType switch
+            {
+                JsonTokenType.String => reader.GetString(),
+                JsonTokenType.Number => reader.GetDouble().ToString(CultureInfo.InvariantCulture),
+                JsonTokenType.Null => null,
+                _ => null
+            };
+        }
+
+        public override void Write(Utf8JsonWriter writer, string? value, JsonSerializerOptions options)
+        {
+            writer.WriteStringValue(value);
+        }
+    }
+
+    public static List<T> ParseJsExport<T>(string jsContent, ILogger? logger = null)
     {
         // Try array format: "export const x = [...]"
         var arrayMatch = ArrayPattern().Match(jsContent);
         if (arrayMatch.Success)
         {
+            logger?.LogDebug("Matched array export pattern for {Type}", typeof(T).Name);
             var json = TrailingCommaPattern().Replace(arrayMatch.Groups[1].Value, "$1");
             try
             {
                 return JsonSerializer.Deserialize<List<T>>(json, JsonOptions) ?? [];
             }
-            catch
+            catch (JsonException ex)
             {
+                logger?.LogWarning(ex, "Failed to deserialize array JSON for {Type}. JSON preview: {Preview}",
+                    typeof(T).Name, json[..Math.Min(200, json.Length)]);
                 return [];
             }
         }
@@ -90,6 +139,7 @@ public partial class BazaarPlannerImporter
         var objectMatch = ObjectPattern().Match(jsContent);
         if (objectMatch.Success)
         {
+            logger?.LogDebug("Matched object export pattern for {Type}", typeof(T).Name);
             var json = TrailingCommaPattern().Replace(objectMatch.Groups[1].Value, "$1");
             try
             {
@@ -112,12 +162,16 @@ public partial class BazaarPlannerImporter
                 }
                 return results;
             }
-            catch
+            catch (Exception ex) when (ex is JsonException or InvalidOperationException)
             {
+                logger?.LogWarning(ex, "Failed to deserialize object JSON for {Type}. JSON preview: {Preview}",
+                    typeof(T).Name, json[..Math.Min(200, json.Length)]);
                 return [];
             }
         }
 
+        logger?.LogWarning("No export pattern matched in content ({Length} chars). Preview: {Preview}",
+            jsContent.Length, jsContent[..Math.Min(200, jsContent.Length)]);
         return [];
     }
 

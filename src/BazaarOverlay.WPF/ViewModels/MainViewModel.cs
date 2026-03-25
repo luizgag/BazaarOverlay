@@ -3,6 +3,7 @@ using BazaarOverlay.Application.Interfaces;
 using BazaarOverlay.Domain.Interfaces;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
 
 namespace BazaarOverlay.WPF.ViewModels;
 
@@ -11,6 +12,7 @@ public partial class MainViewModel : ObservableObject
     private readonly IGameSessionService _gameSession;
     private readonly IHeroRepository _heroRepository;
     private readonly IDataImportService _dataImportService;
+    private readonly ILogger<MainViewModel> _logger;
 
     [ObservableProperty]
     private string? _selectedHero;
@@ -37,13 +39,15 @@ public partial class MainViewModel : ObservableObject
         IHeroRepository heroRepository,
         IDataImportService dataImportService,
         MonsterEncounterViewModel monsterEncounterViewModel,
-        ItemSkillInfoViewModel itemSkillInfoViewModel)
+        ItemSkillInfoViewModel itemSkillInfoViewModel,
+        ILogger<MainViewModel> logger)
     {
         _gameSession = gameSession;
         _heroRepository = heroRepository;
         _dataImportService = dataImportService;
         MonsterEncounter = monsterEncounterViewModel;
         ItemSkillInfo = itemSkillInfoViewModel;
+        _logger = logger;
     }
 
     public async Task InitializeAsync()
@@ -88,6 +92,7 @@ public partial class MainViewModel : ObservableObject
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Download data failed");
             ImportStatus = $"Error: {ex.Message}";
         }
         finally
