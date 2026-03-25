@@ -13,7 +13,7 @@ public record BazaarPlannerItem(
 public record BazaarPlannerMonsterEntry(string Name, int? Tier);
 
 public record BazaarPlannerMonster(
-    string Name, int? Day, int? Health,
+    string Name, string? Day, int? Health,
     List<BazaarPlannerMonsterEntry>? Items,
     List<BazaarPlannerMonsterEntry>? Skills);
 
@@ -122,7 +122,7 @@ public partial class BazaarPlannerImporter
         if (arrayMatch.Success)
         {
             logger?.LogDebug("Matched array export pattern for {Type}", typeof(T).Name);
-            var json = TrailingCommaPattern().Replace(arrayMatch.Groups[1].Value, "$1");
+            var json = CleanJsJson(arrayMatch.Groups[1].Value);
             try
             {
                 return JsonSerializer.Deserialize<List<T>>(json, JsonOptions) ?? [];
@@ -140,25 +140,33 @@ public partial class BazaarPlannerImporter
         if (objectMatch.Success)
         {
             logger?.LogDebug("Matched object export pattern for {Type}", typeof(T).Name);
-            var json = TrailingCommaPattern().Replace(objectMatch.Groups[1].Value, "$1");
+            var json = CleanJsJson(objectMatch.Groups[1].Value);
             try
             {
                 using var doc = JsonDocument.Parse(json, new JsonDocumentOptions { AllowTrailingCommas = true });
                 var results = new List<T>();
                 foreach (var property in doc.RootElement.EnumerateObject())
                 {
-                    // Inject the key as "name" if the value object doesn't have one
-                    var valueJson = property.Value.GetRawText();
-                    if (property.Value.ValueKind == JsonValueKind.Object
-                        && !property.Value.TryGetProperty("name", out _))
+                    try
                     {
-                        // Insert "name":"key" at the start of the object
-                        valueJson = $"{{\"name\":{JsonSerializer.Serialize(property.Name)},{valueJson[1..]}";
-                    }
+                        // Inject the key as "name" if the value object doesn't have one
+                        var valueJson = property.Value.GetRawText();
+                        if (property.Value.ValueKind == JsonValueKind.Object
+                            && !property.Value.TryGetProperty("name", out _))
+                        {
+                            // Insert "name":"key" at the start of the object
+                            valueJson = $"{{\"name\":{JsonSerializer.Serialize(property.Name)},{valueJson[1..]}";
+                        }
 
-                    var item = JsonSerializer.Deserialize<T>(valueJson, JsonOptions);
-                    if (item is not null)
-                        results.Add(item);
+                        var item = JsonSerializer.Deserialize<T>(valueJson, JsonOptions);
+                        if (item is not null)
+                            results.Add(item);
+                    }
+                    catch (JsonException ex)
+                    {
+                        logger?.LogWarning(ex, "Skipping entry '{Key}' for {Type}: deserialization failed",
+                            property.Name, typeof(T).Name);
+                    }
                 }
                 return results;
             }
@@ -175,6 +183,14 @@ public partial class BazaarPlannerImporter
         return [];
     }
 
+    private static string CleanJsJson(string raw)
+    {
+        var cleaned = TrailingCommaPattern().Replace(raw, "$1");
+        cleaned = UnquotedKeyPattern().Replace(cleaned, "$1\"$2\":");
+        return cleaned;
+    }
+
+
     [GeneratedRegex(@"=\s*(\[.*\])\s*;?\s*$", RegexOptions.Singleline)]
     private static partial Regex ArrayPattern();
 
@@ -183,4 +199,8 @@ public partial class BazaarPlannerImporter
 
     [GeneratedRegex(@",(\s*[\]\}])")]
     private static partial Regex TrailingCommaPattern();
+
+    // Matches unquoted JS property names at line start like:  enchants: or  priorites:
+    [GeneratedRegex(@"^(\s+)([a-zA-Z_]\w*)\s*:", RegexOptions.Multiline)]
+    private static partial Regex UnquotedKeyPattern();
 }

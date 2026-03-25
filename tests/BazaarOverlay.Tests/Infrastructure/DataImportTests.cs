@@ -240,7 +240,7 @@ public class DataImportTests
         result.Count.ShouldBe(1);
         result[0].Name.ShouldBe("Goblin");
         result[0].Health.ShouldBe(45);
-        result[0].Day.ShouldBe(1);
+        result[0].Day.ShouldBe("1");
     }
 
     [Fact]
@@ -355,6 +355,69 @@ public class DataImportTests
         result.Count.ShouldBe(1);
         result[0].Name.ShouldBe("Viper");
         result[0].Items![0].Name.ShouldBe("Fang");
+    }
+
+    [Fact]
+    public void ParseJsExport_WithUnquotedPropertyNames_ParsesItems()
+    {
+        var js = """
+            export const items = {
+                "Red Envelope": {
+                    "name": "Red Envelope",
+                    "tier": 0,
+                    "tags": ["Common"],
+                    "cooldown": null,
+                    "ammo": null,
+                    "text": ["When you buy this, gain 10 Gold."],
+                    enchants: {},
+                    priorites: [0]
+                }
+            };
+            """;
+
+        var result = BazaarPlannerImporter.ParseJsExport<BazaarPlannerItem>(js);
+
+        result.Count.ShouldBe(1);
+        result[0].Name.ShouldBe("Red Envelope");
+    }
+
+    [Fact]
+    public void ParseJsExport_WithMonsterDayAsString_ParsesMonsters()
+    {
+        var js = """
+            export const monsters = {
+                "Qomatz": {"name": "Qomatz", "day": "event", "health": 200,
+                    "skills": [{"name": "Roar", "tier": 1}], "items": []},
+                "Goblin": {"name": "Goblin", "day": 1, "health": 50,
+                    "skills": [], "items": []}
+            };
+            """;
+
+        var result = BazaarPlannerImporter.ParseJsExport<BazaarPlannerMonster>(js);
+
+        result.Count.ShouldBe(2);
+        result[0].Day.ShouldBe("event");
+        result[1].Day.ShouldBe("1");
+    }
+
+    [Fact]
+    public void ParseJsExport_WithSingleBadEntry_SkipsAndParsesRest()
+    {
+        var logger = new TestLogger<BazaarPlannerImporter>();
+        // Second entry is a non-object value that can't deserialize as BazaarPlannerItem
+        var js = """
+            export const items = {
+                "Sword": {"name": "Sword", "tier": 1, "tags": ["Weapon"]},
+                "Bad": "not an object",
+                "Shield": {"name": "Shield", "tier": 2, "tags": ["Armor"]}
+            };
+            """;
+
+        var result = BazaarPlannerImporter.ParseJsExport<BazaarPlannerItem>(js, logger);
+
+        result.Count.ShouldBe(2);
+        result[0].Name.ShouldBe("Sword");
+        result[1].Name.ShouldBe("Shield");
     }
 
     [Fact]

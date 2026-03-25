@@ -235,7 +235,7 @@ public class DataImportService : IDataImportService
             }
 
             var health = bp.Health ?? 100;
-            var day = bp.Day ?? 1;
+            var day = int.TryParse(bp.Day, out var parsedDay) ? parsedDay : 1;
 
             var monster = new Monster(bp.Name, health, Rarity.Bronze, day);
 
