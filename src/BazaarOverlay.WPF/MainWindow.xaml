@@ -63,7 +63,7 @@
             <!-- Content Area -->
             <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="0,8,0,0">
                 <StackPanel>
-                    <StackPanel IsEnabled="{Binding IsHeroSelected}">
+                    <StackPanel>
                         <TextBlock Text="Encounter Search" FontWeight="SemiBold"
                                    Foreground="#AAAACC" Margin="0,0,0,6"/>
                     <TextBox Text="{Binding MonsterEncounter.SearchText, UpdateSourceTrigger=PropertyChanged}"

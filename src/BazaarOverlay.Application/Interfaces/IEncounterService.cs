@@ -4,5 +4,5 @@ namespace BazaarOverlay.Application.Interfaces;
 
 public interface IEncounterService
 {
-    Task<IReadOnlyList<EncounterResult>> SearchEncountersAsync(string partialName, string heroName, int currentDay);
+    Task<IReadOnlyList<EncounterResult>> SearchEncountersAsync(string partialName, string? heroName, int currentDay);
 }

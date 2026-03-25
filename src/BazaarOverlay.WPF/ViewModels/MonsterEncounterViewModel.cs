@@ -47,7 +47,7 @@ public partial class MonsterEncounterViewModel : ObservableObject
     private async Task SearchAsync(string? searchText = null)
     {
         var query = searchText ?? SearchText;
-        if (string.IsNullOrWhiteSpace(query) || _gameSession.CurrentHero is null)
+        if (string.IsNullOrWhiteSpace(query))
             return;
 
         IsSearching = true;
