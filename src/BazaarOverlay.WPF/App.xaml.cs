@@ -61,7 +61,8 @@ public partial class App : System.Windows.Application
         Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
 
         services.AddDbContext<BazaarDbContext>(options =>
-            options.UseSqlite($"Data Source={dbPath}"));
+            options.UseSqlite($"Data Source={dbPath}",
+                o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
 
         // Repositories
         services.AddScoped<IHeroRepository, HeroRepository>();
