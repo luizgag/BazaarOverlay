@@ -98,6 +98,16 @@ public class DataImportService : IDataImportService
         progress?.Report("Import complete!");
     }
 
+    private static readonly HashSet<string> HeroNames = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Dooley", "Jules", "Mak", "Pygmalien", "Stelle", "Vanessa"
+    };
+
+    private static readonly HashSet<string> SizeNames = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Small", "Medium", "Large"
+    };
+
     private async Task ImportItemsAsync(List<BazaarPlannerItem> bpItems)
     {
         var existingHeroes = await _context.Heroes.ToDictionaryAsync(h => h.Name, StringComparer.OrdinalIgnoreCase);
@@ -110,21 +120,23 @@ public class DataImportService : IDataImportService
             if (await _context.Items.AnyAsync(i => i.Name == bp.Name))
                 continue;
 
-            var size = ParseSize(bp.Size);
-            var rarity = ParseRarity(bp.StartingTier);
+            var tags = bp.Tags ?? [];
+            var heroTags = tags.Where(t => HeroNames.Contains(t)).ToList();
+            var sizeTag = tags.FirstOrDefault(t => SizeNames.Contains(t));
+            var itemTags = tags.Where(t => !HeroNames.Contains(t) && !SizeNames.Contains(t)).ToList();
+
+            var size = ParseSize(sizeTag);
+            var rarity = MapTierToRarity(bp.Tier);
             var cooldown = decimal.TryParse(bp.Cooldown, out var cd) ? cd : (decimal?)null;
 
             var item = new Item(bp.Name, size, rarity, cooldown);
 
-            if (bp.Tags is not null)
-            {
-                foreach (var tag in bp.Tags)
-                    item.Tags.Add(new ItemTag(tag));
-            }
+            foreach (var tag in itemTags)
+                item.Tags.Add(new ItemTag(tag));
 
-            if (bp.Heroes is not null)
+            if (heroTags.Count > 0)
             {
-                foreach (var heroName in bp.Heroes)
+                foreach (var heroName in heroTags)
                 {
                     if (existingHeroes.TryGetValue(heroName, out var hero))
                         item.Heroes.Add(hero);
@@ -154,18 +166,19 @@ public class DataImportService : IDataImportService
             if (await _context.Skills.AnyAsync(s => s.Name == bp.Name))
                 continue;
 
-            var rarity = ParseRarity(bp.StartingTier);
+            var tags = bp.Tags ?? [];
+            var heroTags = tags.Where(t => HeroNames.Contains(t)).ToList();
+            var skillTags = tags.Where(t => !HeroNames.Contains(t)).ToList();
+
+            var rarity = MapTierToRarity(bp.Tier);
             var skill = new Skill(bp.Name, rarity);
 
-            if (bp.Tags is not null)
-            {
-                foreach (var tag in bp.Tags)
-                    skill.Tags.Add(new SkillTag(tag));
-            }
+            foreach (var tag in skillTags)
+                skill.Tags.Add(new SkillTag(tag));
 
-            if (bp.Heroes is not null)
+            if (heroTags.Count > 0)
             {
-                foreach (var heroName in bp.Heroes)
+                foreach (var heroName in heroTags)
                 {
                     if (existingHeroes.TryGetValue(heroName, out var hero))
                         skill.Heroes.Add(hero);
@@ -193,17 +206,16 @@ public class DataImportService : IDataImportService
             if (await _context.Monsters.AnyAsync(m => m.Name == bp.Name))
                 continue;
 
-            var rarity = ParseRarity(bp.Tier);
             var health = bp.Health ?? 100;
             var day = bp.Day ?? 1;
 
-            var monster = new Monster(bp.Name, health, rarity, day);
+            var monster = new Monster(bp.Name, health, Rarity.Bronze, day);
 
             if (bp.Items is not null)
             {
-                foreach (var itemName in bp.Items)
+                foreach (var entry in bp.Items)
                 {
-                    var item = await _context.Items.FirstOrDefaultAsync(i => i.Name == itemName);
+                    var item = await _context.Items.FirstOrDefaultAsync(i => i.Name == entry.Name);
                     if (item is not null)
                         monster.DropItems.Add(item);
                 }
@@ -211,9 +223,9 @@ public class DataImportService : IDataImportService
 
             if (bp.Skills is not null)
             {
-                foreach (var skillName in bp.Skills)
+                foreach (var entry in bp.Skills)
                 {
-                    var skill = await _context.Skills.FirstOrDefaultAsync(s => s.Name == skillName);
+                    var skill = await _context.Skills.FirstOrDefaultAsync(s => s.Name == entry.Name);
                     if (skill is not null)
                         monster.DropSkills.Add(skill);
                 }
@@ -260,13 +272,13 @@ public class DataImportService : IDataImportService
         _ => ItemSize.Small
     };
 
-    private static Rarity ParseRarity(string? rarity) => rarity?.ToLower() switch
+    private static Rarity MapTierToRarity(int? tier) => tier switch
     {
-        "bronze" => Rarity.Bronze,
-        "silver" => Rarity.Silver,
-        "gold" => Rarity.Gold,
-        "diamond" => Rarity.Diamond,
-        "legendary" => Rarity.Legendary,
+        0 => Rarity.Bronze,
+        1 => Rarity.Silver,
+        2 => Rarity.Gold,
+        3 => Rarity.Diamond,
+        4 => Rarity.Legendary,
         _ => Rarity.Bronze
     };
 

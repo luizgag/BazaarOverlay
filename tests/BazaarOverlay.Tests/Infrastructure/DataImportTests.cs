@@ -8,51 +8,81 @@ namespace BazaarOverlay.Tests.Infrastructure;
 public class DataImportTests
 {
     [Fact]
-    public void ParseJsArray_WithValidItemsJs_ReturnsItems()
+    public void ParseJsExport_WithObjectFormat_ReturnsItems()
     {
         var js = """
-            export const items = [
-                {"Name": "Rusty Sword", "Size": "Small", "StartingTier": "Bronze", "Tags": ["Weapon"], "Heroes": ["Vanessa"]},
-                {"Name": "Shield", "Size": "Medium", "StartingTier": "Bronze", "Tags": ["Armor"], "Heroes": null}
-            ];
+            export const items = {
+                "Rusty Sword": {"name": "Rusty Sword", "tier": 2, "tags": ["Weapon", "Small"], "cooldown": null, "ammo": null},
+                "Shield": {"name": "Shield", "tier": 1, "tags": ["Armor", "Medium"], "cooldown": null, "ammo": null}
+            };
             """;
 
-        var result = BazaarPlannerImporter.ParseJsArray<BazaarPlannerItem>(js);
+        var result = BazaarPlannerImporter.ParseJsExport<BazaarPlannerItem>(js);
 
         result.Count.ShouldBe(2);
         result[0].Name.ShouldBe("Rusty Sword");
-        result[0].Size.ShouldBe("Small");
         result[0].Tags.ShouldContain("Weapon");
         result[1].Name.ShouldBe("Shield");
     }
 
     [Fact]
-    public void ParseJsArray_WithValidMonstersJs_ReturnsMonsters()
+    public void ParseJsExport_WithObjectFormat_ReturnsMonsters()
     {
         var js = """
-            export const monsters = [
-                {"Name": "Goblin", "Tier": "Bronze", "Health": 45, "Day": 1, "Items": ["Rusty Sword"], "Skills": ["Quick Strike"]}
-            ];
+            export const monsters = {
+                "Goblin": {"name": "Goblin", "day": 1, "health": 45, "skills": [{"name": "Bite", "tier": 0}], "items": [{"name": "Fang", "tier": 0}]}
+            };
             """;
 
-        var result = BazaarPlannerImporter.ParseJsArray<BazaarPlannerMonster>(js);
+        var result = BazaarPlannerImporter.ParseJsExport<BazaarPlannerMonster>(js);
 
         result.Count.ShouldBe(1);
         result[0].Name.ShouldBe("Goblin");
         result[0].Health.ShouldBe(45);
-        result[0].Items.ShouldContain("Rusty Sword");
+        result[0].Day.ShouldBe(1);
     }
 
     [Fact]
-    public void ParseJsArray_WithTrailingCommas_HandlesGracefully()
+    public void ParseJsExport_WithObjectFormat_ReturnsSkills()
+    {
+        var js = """
+            export const skills = {
+                "Above the Clouds": {"name": "Above the Clouds", "tier": 2, "tags": ["Stelle", "FlyingReference", "Crit"]}
+            };
+            """;
+
+        var result = BazaarPlannerImporter.ParseJsExport<BazaarPlannerSkill>(js);
+
+        result.Count.ShouldBe(1);
+        result[0].Name.ShouldBe("Above the Clouds");
+        result[0].Tags.ShouldContain("Stelle");
+    }
+
+    [Fact]
+    public void ParseJsExport_WithArrayFormat_StillWorks()
     {
         var js = """
             export const items = [
-                {"Name": "Sword", "Size": "Small",},
+                {"name": "Sword", "tags": ["Weapon"]}
             ];
             """;
 
-        var result = BazaarPlannerImporter.ParseJsArray<BazaarPlannerItem>(js);
+        var result = BazaarPlannerImporter.ParseJsExport<BazaarPlannerItem>(js);
+
+        result.Count.ShouldBe(1);
+        result[0].Name.ShouldBe("Sword");
+    }
+
+    [Fact]
+    public void ParseJsExport_WithTrailingCommas_HandlesGracefully()
+    {
+        var js = """
+            export const items = {
+                "Sword": {"name": "Sword", "tags": ["Weapon"],},
+            };
+            """;
+
+        var result = BazaarPlannerImporter.ParseJsExport<BazaarPlannerItem>(js);
 
         result.Count.ShouldBe(1);
         result[0].Name.ShouldBe("Sword");
@@ -63,7 +93,7 @@ public class DataImportTests
     {
         var js = "this is not valid js";
 
-        var result = BazaarPlannerImporter.ParseJsArray<BazaarPlannerItem>(js);
+        var result = BazaarPlannerImporter.ParseJsExport<BazaarPlannerItem>(js);
 
         result.ShouldBeEmpty();
     }
