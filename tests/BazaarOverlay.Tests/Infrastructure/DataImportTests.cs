@@ -1,4 +1,6 @@
 using BazaarOverlay.Infrastructure.DataImport;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 
 namespace BazaarOverlay.Tests.Infrastructure;
@@ -71,8 +73,8 @@ public class DataImportTests
     {
         using var context = TestDbContextFactory.Create();
         var httpClient = new HttpClient();
-        var importer = new BazaarPlannerImporter(httpClient);
-        var service = new DataImportService(context, importer);
+        var importer = new BazaarPlannerImporter(httpClient, NullLogger<BazaarPlannerImporter>.Instance);
+        var service = new DataImportService(context, importer, NullLogger<DataImportService>.Instance);
 
         await service.SeedHeroesAsync();
 
@@ -84,8 +86,8 @@ public class DataImportTests
     {
         using var context = TestDbContextFactory.Create();
         var httpClient = new HttpClient();
-        var importer = new BazaarPlannerImporter(httpClient);
-        var service = new DataImportService(context, importer);
+        var importer = new BazaarPlannerImporter(httpClient, NullLogger<BazaarPlannerImporter>.Instance);
+        var service = new DataImportService(context, importer, NullLogger<DataImportService>.Instance);
 
         await service.SeedRarityProbabilitiesAsync();
 
@@ -97,8 +99,8 @@ public class DataImportTests
     {
         using var context = TestDbContextFactory.Create();
         var httpClient = new HttpClient();
-        var importer = new BazaarPlannerImporter(httpClient);
-        var service = new DataImportService(context, importer);
+        var importer = new BazaarPlannerImporter(httpClient, NullLogger<BazaarPlannerImporter>.Instance);
+        var service = new DataImportService(context, importer, NullLogger<DataImportService>.Instance);
 
         await service.SeedHeroesAsync();
         await service.SeedHeroesAsync(); // second call

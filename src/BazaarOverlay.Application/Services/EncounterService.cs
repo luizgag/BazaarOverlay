@@ -2,6 +2,7 @@ using BazaarOverlay.Application.DTOs;
 using BazaarOverlay.Application.Interfaces;
 using BazaarOverlay.Domain.Enums;
 using BazaarOverlay.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace BazaarOverlay.Application.Services;
 
@@ -11,21 +12,25 @@ public class EncounterService : IEncounterService
     private readonly IShopService _shopService;
     private readonly IEncounterRepository _encounterRepository;
     private readonly IRarityDayProbabilityRepository _rarityRepository;
+    private readonly ILogger<EncounterService> _logger;
 
     public EncounterService(
         IMonsterEncounterService monsterService,
         IShopService shopService,
         IEncounterRepository encounterRepository,
-        IRarityDayProbabilityRepository rarityRepository)
+        IRarityDayProbabilityRepository rarityRepository,
+        ILogger<EncounterService> logger)
     {
         _monsterService = monsterService;
         _shopService = shopService;
         _encounterRepository = encounterRepository;
         _rarityRepository = rarityRepository;
+        _logger = logger;
     }
 
     public async Task<IReadOnlyList<EncounterResult>> SearchEncountersAsync(string partialName, string heroName, int currentDay)
     {
+        _logger.LogInformation("Searching encounters: {Query} for {Hero} on day {Day}", partialName, heroName, currentDay);
         var encounters = await _encounterRepository.SearchByNameAsync(partialName);
         var availableRarities = await _rarityRepository.GetAvailableRaritiesForDayAsync(currentDay);
         var results = new List<EncounterResult>();

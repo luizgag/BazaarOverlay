@@ -5,6 +5,7 @@ using BazaarOverlay.Domain.Entities;
 using BazaarOverlay.Domain.Enums;
 using BazaarOverlay.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace BazaarOverlay.Infrastructure.DataImport;
 
@@ -12,15 +13,18 @@ public class DataImportService : IDataImportService
 {
     private readonly BazaarDbContext _context;
     private readonly BazaarPlannerImporter _importer;
+    private readonly ILogger<DataImportService> _logger;
 
-    public DataImportService(BazaarDbContext context, BazaarPlannerImporter importer)
+    public DataImportService(BazaarDbContext context, BazaarPlannerImporter importer, ILogger<DataImportService> logger)
     {
         _context = context;
         _importer = importer;
+        _logger = logger;
     }
 
     public async Task SeedHeroesAsync()
     {
+        _logger.LogInformation("Seeding heroes...");
         var heroNames = new[] { "Dooley", "Jules", "Mak", "Pygmalien", "Stelle", "Vanessa", "Neutral" };
         foreach (var name in heroNames)
         {
@@ -28,12 +32,17 @@ public class DataImportService : IDataImportService
                 _context.Heroes.Add(new Hero(name));
         }
         await _context.SaveChangesAsync();
+        _logger.LogInformation("Heroes seeded successfully");
     }
 
     public async Task SeedRarityProbabilitiesAsync()
     {
+        _logger.LogInformation("Seeding rarity probabilities...");
         if (await _context.RarityDayProbabilities.AnyAsync())
+        {
+            _logger.LogInformation("Rarity probabilities already seeded, skipping");
             return;
+        }
 
         var assembly = Assembly.GetExecutingAssembly();
         var resourceName = "BazaarOverlay.Infrastructure.SeedData.rarity-day-probabilities.json";
@@ -55,10 +64,12 @@ public class DataImportService : IDataImportService
             }
         }
         await _context.SaveChangesAsync();
+        _logger.LogInformation("Rarity probabilities seeded successfully");
     }
 
     public async Task ImportAllAsync(IProgress<string>? progress = null)
     {
+        _logger.LogInformation("Starting full data import...");
         progress?.Report("Seeding heroes...");
         await SeedHeroesAsync();
 
@@ -83,6 +94,7 @@ public class DataImportService : IDataImportService
         progress?.Report("Seeding enchantments...");
         await SeedEnchantmentsAsync();
 
+        _logger.LogInformation("Full data import completed");
         progress?.Report("Import complete!");
     }
 

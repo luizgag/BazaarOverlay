@@ -2,6 +2,8 @@ using BazaarOverlay.Application.Services;
 using BazaarOverlay.Domain.Entities;
 using BazaarOverlay.Domain.Enums;
 using BazaarOverlay.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using Shouldly;
 
@@ -14,7 +16,7 @@ public class ItemInfoServiceTests
 
     public ItemInfoServiceTests()
     {
-        _sut = new ItemInfoService(_itemRepo);
+        _sut = new ItemInfoService(_itemRepo, NullLogger<ItemInfoService>.Instance);
     }
 
     [Fact]

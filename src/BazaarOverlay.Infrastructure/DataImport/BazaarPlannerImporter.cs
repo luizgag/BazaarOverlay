@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
 
 namespace BazaarOverlay.Infrastructure.DataImport;
 
@@ -17,29 +18,46 @@ public record BazaarPlannerSkill(
 public partial class BazaarPlannerImporter
 {
     private readonly HttpClient _httpClient;
+    private readonly ILogger<BazaarPlannerImporter> _logger;
     private const string BaseUrl = "https://raw.githubusercontent.com/oceanseth/BazaarPlanner/main/";
 
-    public BazaarPlannerImporter(HttpClient httpClient)
+    public BazaarPlannerImporter(HttpClient httpClient, ILogger<BazaarPlannerImporter> logger)
     {
         _httpClient = httpClient;
+        _logger = logger;
     }
 
     public async Task<List<BazaarPlannerItem>> FetchItemsAsync()
     {
+        _logger.LogInformation("Fetching items from BazaarPlanner...");
         var js = await _httpClient.GetStringAsync($"{BaseUrl}items.js");
-        return ParseJsArray<BazaarPlannerItem>(js);
+        var items = ParseJsArray<BazaarPlannerItem>(js);
+        if (items.Count == 0 && js.Length > 0)
+            _logger.LogWarning("BazaarPlanner items.js returned content but parsed to 0 items");
+        _logger.LogInformation("Fetched {Count} items from BazaarPlanner", items.Count);
+        return items;
     }
 
     public async Task<List<BazaarPlannerMonster>> FetchMonstersAsync()
     {
+        _logger.LogInformation("Fetching monsters from BazaarPlanner...");
         var js = await _httpClient.GetStringAsync($"{BaseUrl}monsters.js");
-        return ParseJsArray<BazaarPlannerMonster>(js);
+        var monsters = ParseJsArray<BazaarPlannerMonster>(js);
+        if (monsters.Count == 0 && js.Length > 0)
+            _logger.LogWarning("BazaarPlanner monsters.js returned content but parsed to 0 monsters");
+        _logger.LogInformation("Fetched {Count} monsters from BazaarPlanner", monsters.Count);
+        return monsters;
     }
 
     public async Task<List<BazaarPlannerSkill>> FetchSkillsAsync()
     {
+        _logger.LogInformation("Fetching skills from BazaarPlanner...");
         var js = await _httpClient.GetStringAsync($"{BaseUrl}skills.js");
-        return ParseJsArray<BazaarPlannerSkill>(js);
+        var skills = ParseJsArray<BazaarPlannerSkill>(js);
+        if (skills.Count == 0 && js.Length > 0)
+            _logger.LogWarning("BazaarPlanner skills.js returned content but parsed to 0 skills");
+        _logger.LogInformation("Fetched {Count} skills from BazaarPlanner", skills.Count);
+        return skills;
     }
 
     public static List<T> ParseJsArray<T>(string jsContent)

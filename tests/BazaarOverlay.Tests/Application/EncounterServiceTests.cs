@@ -4,6 +4,8 @@ using BazaarOverlay.Application.Services;
 using BazaarOverlay.Domain.Entities;
 using BazaarOverlay.Domain.Enums;
 using BazaarOverlay.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using Shouldly;
 
@@ -19,7 +21,7 @@ public class EncounterServiceTests
 
     public EncounterServiceTests()
     {
-        _sut = new EncounterService(_monsterService, _shopService, _encounterRepo, _rarityRepo);
+        _sut = new EncounterService(_monsterService, _shopService, _encounterRepo, _rarityRepo, NullLogger<EncounterService>.Instance);
     }
 
     [Fact]

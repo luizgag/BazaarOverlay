@@ -1,5 +1,7 @@
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows;
+using Microsoft.Extensions.Logging;
 using BazaarOverlay.Application.Interfaces;
 using BazaarOverlay.Application.Services;
 using BazaarOverlay.Domain.Interfaces;
@@ -14,20 +16,33 @@ namespace BazaarOverlay.WPF;
 
 public partial class App : System.Windows.Application
 {
+#if DEBUG
+    [LibraryImport("kernel32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool AllocConsole();
+#endif
+
     private ServiceProvider? _serviceProvider;
+    private ILogger<App>? _logger;
 
     protected override void OnStartup(StartupEventArgs e)
     {
+#if DEBUG
+        AllocConsole();
+#endif
         base.OnStartup(e);
 
         var services = new ServiceCollection();
         ConfigureServices(services);
         _serviceProvider = services.BuildServiceProvider();
+        _logger = _serviceProvider.GetRequiredService<ILogger<App>>();
+        _logger.LogInformation("BazaarOverlay starting up...");
 
         using (var scope = _serviceProvider.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<BazaarDbContext>();
             context.Database.EnsureCreated();
+            _logger.LogInformation("Database created/verified");
 
             var importService = scope.ServiceProvider.GetRequiredService<IDataImportService>();
             importService.SeedHeroesAsync().GetAwaiter().GetResult();
@@ -65,6 +80,11 @@ public partial class App : System.Windows.Application
         services.AddScoped<IEncounterService, EncounterService>();
         services.AddScoped<IDataImportService, DataImportService>();
         services.AddHttpClient();
+        services.AddLogging(builder =>
+        {
+            builder.AddConsole();
+            builder.SetMinimumLevel(LogLevel.Information);
+        });
         services.AddTransient<BazaarPlannerImporter>();
 
         // ViewModels
@@ -78,6 +98,7 @@ public partial class App : System.Windows.Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        _logger?.LogInformation("BazaarOverlay shutting down");
         _serviceProvider?.Dispose();
         base.OnExit(e);
     }

@@ -3,6 +3,7 @@ using BazaarOverlay.Application.Interfaces;
 using BazaarOverlay.Domain.Entities;
 using BazaarOverlay.Domain.Enums;
 using BazaarOverlay.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace BazaarOverlay.Application.Services;
 
@@ -11,19 +12,23 @@ public class ShopService : IShopService
     private readonly IEncounterRepository _encounterRepository;
     private readonly IItemRepository _itemRepository;
     private readonly IRarityDayProbabilityRepository _rarityRepository;
+    private readonly ILogger<ShopService> _logger;
 
     public ShopService(
         IEncounterRepository encounterRepository,
         IItemRepository itemRepository,
-        IRarityDayProbabilityRepository rarityRepository)
+        IRarityDayProbabilityRepository rarityRepository,
+        ILogger<ShopService> logger)
     {
         _encounterRepository = encounterRepository;
         _itemRepository = itemRepository;
         _rarityRepository = rarityRepository;
+        _logger = logger;
     }
 
     public async Task<ShopResult?> GetShopItemsAsync(string shopName, string heroName, int currentDay)
     {
+        _logger.LogInformation("Looking up shop: {ShopName} for {Hero} on day {Day}", shopName, heroName, currentDay);
         var encounter = await _encounterRepository.GetByNameAsync(shopName);
         if (encounter is null || encounter.Type != EncounterType.Shop)
             return null;
@@ -34,6 +39,7 @@ public class ShopService : IShopService
 
     public async Task<IReadOnlyList<ShopResult>> SearchShopsAsync(string partialName, string heroName, int currentDay)
     {
+        _logger.LogInformation("Searching shops: {Query} for {Hero} on day {Day}", partialName, heroName, currentDay);
         var encounters = await _encounterRepository.SearchByNameAsync(partialName);
         var shops = encounters.Where(e => e.Type == EncounterType.Shop).ToList();
         var results = new List<ShopResult>();
