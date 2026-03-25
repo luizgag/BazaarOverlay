@@ -62,9 +62,10 @@
 
             <!-- Content Area -->
             <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="0,8,0,0">
-                <StackPanel IsEnabled="{Binding IsHeroSelected}">
-                    <TextBlock Text="Encounter Search" FontWeight="SemiBold"
-                               Foreground="#AAAACC" Margin="0,0,0,6"/>
+                <StackPanel>
+                    <StackPanel IsEnabled="{Binding IsHeroSelected}">
+                        <TextBlock Text="Encounter Search" FontWeight="SemiBold"
+                                   Foreground="#AAAACC" Margin="0,0,0,6"/>
                     <TextBox Text="{Binding MonsterEncounter.SearchText, UpdateSourceTrigger=PropertyChanged}"
                              Background="#303040" Foreground="White" Padding="6,4"
                              BorderBrush="#505070"/>
@@ -257,7 +258,9 @@
                             </ItemsControl>
                         </StackPanel>
                     </Border>
-                    <!-- Download Data Section -->
+                    </StackPanel>
+
+                    <!-- Download Data Section (Always Available) -->
                     <Separator Background="#404050" Margin="0,12,0,8"/>
                     <Button Content="Download Data"
                             Command="{Binding DownloadDataCommand}"
