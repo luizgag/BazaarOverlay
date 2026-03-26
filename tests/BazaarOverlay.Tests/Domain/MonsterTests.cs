@@ -9,20 +9,35 @@ public class MonsterTests
     [Fact]
     public void Constructor_WithValidData_CreatesMonster()
     {
-        var monster = new Monster("Goblin", 45, Rarity.Bronze, 1);
+        var monster = new Monster("Banannibal", Rarity.Bronze, level: 1, day: 1,
+            health: 100, goldReward: 2, xpReward: 3);
 
-        monster.Name.ShouldBe("Goblin");
-        monster.Health.ShouldBe(45);
-        monster.Rarity.ShouldBe(Rarity.Bronze);
-        monster.FirstDay.ShouldBe(1);
+        monster.Name.ShouldBe("Banannibal");
+        monster.Tier.ShouldBe(Rarity.Bronze);
+        monster.Level.ShouldBe(1);
+        monster.Day.ShouldBe(1);
+        monster.Health.ShouldBe(100);
+        monster.GoldReward.ShouldBe(2);
+        monster.XpReward.ShouldBe(3);
+    }
+
+    [Fact]
+    public void Constructor_WithBazaarDbId_SetsId()
+    {
+        var monster = new Monster("Banannibal", Rarity.Bronze, level: 1, day: 1,
+            health: 100, goldReward: 2, xpReward: 3,
+            bazaarDbId: "4k4n5d9g1c9ydpt7c1gy7wg72q");
+
+        monster.BazaarDbId.ShouldBe("4k4n5d9g1c9ydpt7c1gy7wg72q");
     }
 
     [Fact]
     public void Constructor_TrimsName()
     {
-        var monster = new Monster("  Goblin  ", 45, Rarity.Bronze, 1);
+        var monster = new Monster("  Banannibal  ", Rarity.Bronze, level: 1, day: 1,
+            health: 100, goldReward: 2, xpReward: 3);
 
-        monster.Name.ShouldBe("Goblin");
+        monster.Name.ShouldBe("Banannibal");
     }
 
     [Theory]
@@ -31,7 +46,8 @@ public class MonsterTests
     [InlineData("   ")]
     public void Constructor_WithInvalidName_ThrowsArgumentException(string? name)
     {
-        Should.Throw<ArgumentException>(() => new Monster(name!, 45, Rarity.Bronze, 1));
+        Should.Throw<ArgumentException>(() => new Monster(name!, Rarity.Bronze,
+            level: 1, day: 1, health: 100, goldReward: 2, xpReward: 3));
     }
 
     [Theory]
@@ -39,38 +55,26 @@ public class MonsterTests
     [InlineData(-1)]
     public void Constructor_WithInvalidHealth_ThrowsArgumentException(int health)
     {
-        Should.Throw<ArgumentException>(() => new Monster("Goblin", health, Rarity.Bronze, 1));
+        Should.Throw<ArgumentException>(() => new Monster("Goblin", Rarity.Bronze,
+            level: 1, day: 1, health: health, goldReward: 2, xpReward: 3));
     }
 
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public void Constructor_WithInvalidFirstDay_ThrowsArgumentException(int firstDay)
+    public void Constructor_WithInvalidDay_ThrowsArgumentException(int day)
     {
-        Should.Throw<ArgumentException>(() => new Monster("Goblin", 45, Rarity.Bronze, firstDay));
+        Should.Throw<ArgumentException>(() => new Monster("Goblin", Rarity.Bronze,
+            level: 1, day: day, health: 100, goldReward: 2, xpReward: 3));
     }
 
     [Fact]
-    public void AppearsOnDay_OnFirstDay_ReturnsTrue()
+    public void BoardCollections_StartEmpty()
     {
-        var monster = new Monster("Goblin", 45, Rarity.Bronze, 3);
+        var monster = new Monster("Banannibal", Rarity.Bronze, level: 1, day: 1,
+            health: 100, goldReward: 2, xpReward: 3);
 
-        monster.AppearsOnDay(3).ShouldBeTrue();
-    }
-
-    [Fact]
-    public void AppearsOnDay_AfterFirstDay_ReturnsTrue()
-    {
-        var monster = new Monster("Goblin", 45, Rarity.Bronze, 3);
-
-        monster.AppearsOnDay(5).ShouldBeTrue();
-    }
-
-    [Fact]
-    public void AppearsOnDay_BeforeFirstDay_ReturnsFalse()
-    {
-        var monster = new Monster("Goblin", 45, Rarity.Bronze, 3);
-
-        monster.AppearsOnDay(2).ShouldBeFalse();
+        monster.BoardItems.ShouldBeEmpty();
+        monster.BoardSkills.ShouldBeEmpty();
     }
 }

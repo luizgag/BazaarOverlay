@@ -13,40 +13,51 @@ public class Monster
     public string Name { get; private set; } = string.Empty;
 
     [Required]
+    public Rarity Tier { get; private set; }
+
+    [Required]
+    [Range(1, int.MaxValue)]
+    public int Level { get; private set; }
+
+    [Required]
+    [Range(1, int.MaxValue)]
+    public int Day { get; private set; }
+
+    [Required]
     [Range(1, int.MaxValue)]
     public int Health { get; private set; }
 
-    [Required]
-    public Rarity Rarity { get; private set; }
+    [Range(0, int.MaxValue)]
+    public int GoldReward { get; private set; }
 
-    [Required]
-    [Range(1, int.MaxValue)]
-    public int FirstDay { get; private set; }
+    [Range(0, int.MaxValue)]
+    public int XpReward { get; private set; }
 
-    public ICollection<Item> DropItems { get; private set; } = new List<Item>();
-    public ICollection<Skill> DropSkills { get; private set; } = new List<Skill>();
+    [MaxLength(50)]
+    public string? BazaarDbId { get; private set; }
+
+    public ICollection<Item> BoardItems { get; private set; } = new List<Item>();
+    public ICollection<Skill> BoardSkills { get; private set; } = new List<Skill>();
 
     private Monster() { }
 
-    public Monster(string name, int health, Rarity rarity, int firstDay)
+    public Monster(string name, Rarity tier, int level, int day, int health,
+        int goldReward, int xpReward, string? bazaarDbId = null)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Monster name cannot be empty.", nameof(name));
         if (health <= 0)
             throw new ArgumentException("Health must be positive.", nameof(health));
-        if (firstDay <= 0)
-            throw new ArgumentException("First day must be positive.", nameof(firstDay));
+        if (day <= 0)
+            throw new ArgumentException("Day must be positive.", nameof(day));
 
         Name = name.Trim();
+        Tier = tier;
+        Level = level;
+        Day = day;
         Health = health;
-        Rarity = rarity;
-        FirstDay = firstDay;
-    }
-
-    public bool AppearsOnDay(int day) => day >= FirstDay;
-
-    public IEnumerable<Item> GetDropsForHero(string heroName)
-    {
-        return DropItems.Where(i => i.IsAvailableForHero(heroName));
+        GoldReward = goldReward;
+        XpReward = xpReward;
+        BazaarDbId = bazaarDbId?.Trim();
     }
 }
