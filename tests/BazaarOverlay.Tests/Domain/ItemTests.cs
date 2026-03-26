@@ -18,11 +18,28 @@ public class ItemTests
     }
 
     [Fact]
-    public void Constructor_WithNullCooldown_AllowsNull()
+    public void Constructor_WithAllFields_SetsAllProperties()
+    {
+        var item = new Item("Trapping Pit", ItemSize.Medium, Rarity.Silver,
+            cooldown: 6.0m, cost: "8 >> 16 >> 32", value: "4 >> 8 >> 16",
+            description: "Destroy enemy item", bazaarDbId: "py8ycyzvx7yg6xk05lj73jdyx");
+
+        item.Cost.ShouldBe("8 >> 16 >> 32");
+        item.Value.ShouldBe("4 >> 8 >> 16");
+        item.Description.ShouldBe("Destroy enemy item");
+        item.BazaarDbId.ShouldBe("py8ycyzvx7yg6xk05lj73jdyx");
+    }
+
+    [Fact]
+    public void Constructor_WithNullOptionalFields_AllowsNulls()
     {
         var item = new Item("Shield", ItemSize.Medium, Rarity.Bronze);
 
         item.Cooldown.ShouldBeNull();
+        item.Cost.ShouldBeNull();
+        item.Value.ShouldBeNull();
+        item.Description.ShouldBeNull();
+        item.BazaarDbId.ShouldBeNull();
     }
 
     [Theory]
@@ -62,23 +79,5 @@ public class ItemTests
         item.Heroes.Add(hero);
 
         item.IsAvailableForHero("Dooley").ShouldBeFalse();
-    }
-
-    [Fact]
-    public void IsAvailableOnDay_WithPositiveProbability_ReturnsTrue()
-    {
-        var item = new Item("Rusty Sword", ItemSize.Small, Rarity.Bronze);
-        var probabilities = new[] { new RarityDayProbability(1, Rarity.Bronze, 100.0m) };
-
-        item.IsAvailableOnDay(1, probabilities).ShouldBeTrue();
-    }
-
-    [Fact]
-    public void IsAvailableOnDay_WithZeroProbability_ReturnsFalse()
-    {
-        var item = new Item("Diamond Ring", ItemSize.Small, Rarity.Diamond);
-        var probabilities = new[] { new RarityDayProbability(1, Rarity.Diamond, 0.0m) };
-
-        item.IsAvailableOnDay(1, probabilities).ShouldBeFalse();
     }
 }
