@@ -8,5 +8,4 @@ public interface IMonsterRepository
     Task<IReadOnlyList<Monster>> SearchByNameAsync(string partialName);
     Task<IReadOnlyList<Monster>> GetByDayAsync(int day);
     Task AddAsync(Monster monster);
-    Task UpdateAsync(Monster monster);
 }

@@ -15,10 +15,10 @@ public class BazaarDbContext : DbContext
     public DbSet<SkillTag> SkillTags => Set<SkillTag>();
     public DbSet<SkillTierValue> SkillTierValues => Set<SkillTierValue>();
     public DbSet<Monster> Monsters => Set<Monster>();
-    public DbSet<Encounter> Encounters => Set<Encounter>();
-    public DbSet<ShopConstraints> ShopConstraints => Set<ShopConstraints>();
-    public DbSet<ShopAllowedTag> ShopAllowedTags => Set<ShopAllowedTag>();
-    public DbSet<RarityDayProbability> RarityDayProbabilities => Set<RarityDayProbability>();
+    public DbSet<Merchant> Merchants => Set<Merchant>();
+    public DbSet<Trainer> Trainers => Set<Trainer>();
+    public DbSet<Event> Events => Set<Event>();
+    public DbSet<EventOption> EventOptions => Set<EventOption>();
 
     public BazaarDbContext(DbContextOptions<BazaarDbContext> options) : base(options) { }
 
@@ -68,12 +68,12 @@ public class BazaarDbContext : DbContext
         modelBuilder.Entity<Monster>(entity =>
         {
             entity.HasIndex(e => e.Name).IsUnique();
-            entity.HasMany(e => e.DropItems)
+            entity.HasMany(e => e.BoardItems)
                 .WithMany()
-                .UsingEntity("MonsterItemDrop");
-            entity.HasMany(e => e.DropSkills)
+                .UsingEntity("MonsterBoardItem");
+            entity.HasMany(e => e.BoardSkills)
                 .WithMany()
-                .UsingEntity("MonsterSkillDrop");
+                .UsingEntity("MonsterBoardSkill");
         });
 
         modelBuilder.Entity<Enchantment>(entity =>
@@ -81,28 +81,29 @@ public class BazaarDbContext : DbContext
             entity.HasIndex(e => e.Name).IsUnique();
         });
 
-        modelBuilder.Entity<Encounter>(entity =>
+        modelBuilder.Entity<Merchant>(entity =>
         {
             entity.HasIndex(e => e.Name).IsUnique();
-            entity.HasOne(e => e.ShopConstraints)
-                .WithOne(sc => sc.Encounter)
-                .HasForeignKey<ShopConstraints>(sc => sc.EncounterId)
-                .OnDelete(DeleteBehavior.Cascade);
-            entity.HasMany(e => e.ShopAllowedTags)
-                .WithOne(t => t.Encounter)
-                .HasForeignKey(t => t.EncounterId)
-                .OnDelete(DeleteBehavior.Cascade);
-            entity.HasMany(e => e.RewardItems)
+            entity.HasMany(e => e.ItemPool)
                 .WithMany()
-                .UsingEntity("EncounterItemReward");
-            entity.HasMany(e => e.RewardSkills)
-                .WithMany()
-                .UsingEntity("EncounterSkillReward");
+                .UsingEntity("MerchantItem");
         });
 
-        modelBuilder.Entity<RarityDayProbability>(entity =>
+        modelBuilder.Entity<Trainer>(entity =>
         {
-            entity.HasKey(e => new { e.Day, e.Rarity });
+            entity.HasIndex(e => e.Name).IsUnique();
+            entity.HasMany(e => e.SkillPool)
+                .WithMany()
+                .UsingEntity("TrainerSkill");
+        });
+
+        modelBuilder.Entity<Event>(entity =>
+        {
+            entity.HasIndex(e => e.Name).IsUnique();
+            entity.HasMany(e => e.Options)
+                .WithOne(o => o.Event)
+                .HasForeignKey(o => o.EventId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
