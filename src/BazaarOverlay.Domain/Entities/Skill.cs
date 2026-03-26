@@ -15,18 +15,31 @@ public class Skill
     [Required]
     public Rarity MinimumRarity { get; private set; }
 
+    [MaxLength(100)]
+    public string? Cost { get; private set; }
+
+    [MaxLength(500)]
+    public string? Description { get; private set; }
+
+    [MaxLength(50)]
+    public string? BazaarDbId { get; private set; }
+
     public ICollection<SkillTag> Tags { get; private set; } = new List<SkillTag>();
     public ICollection<Hero> Heroes { get; private set; } = new List<Hero>();
     public ICollection<SkillTierValue> TierValues { get; private set; } = new List<SkillTierValue>();
 
     private Skill() { }
 
-    public Skill(string name, Rarity minimumRarity)
+    public Skill(string name, Rarity minimumRarity, string? cost = null,
+        string? description = null, string? bazaarDbId = null)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Skill name cannot be empty.", nameof(name));
 
         Name = name.Trim();
         MinimumRarity = minimumRarity;
+        Cost = cost?.Trim();
+        Description = description?.Trim();
+        BazaarDbId = bazaarDbId?.Trim();
     }
 }
