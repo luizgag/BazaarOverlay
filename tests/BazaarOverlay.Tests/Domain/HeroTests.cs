@@ -29,4 +29,21 @@ public class HeroTests
     {
         Should.Throw<ArgumentException>(() => new Hero(name!));
     }
+
+    [Fact]
+    public void Constructor_WithAbbreviation_SetsAbbreviation()
+    {
+        var hero = new Hero("Karnok", "KAR");
+
+        hero.Name.ShouldBe("Karnok");
+        hero.Abbreviation.ShouldBe("KAR");
+    }
+
+    [Fact]
+    public void Constructor_WithoutAbbreviation_DefaultsToEmptyString()
+    {
+        var hero = new Hero("Karnok");
+
+        hero.Abbreviation.ShouldBe(string.Empty);
+    }
 }
