@@ -16,6 +16,7 @@ using BazaarOverlay.WPF.Services;
 using BazaarOverlay.WPF.ViewModels;
 using BazaarOverlay.WPF.Views;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BazaarOverlay.WPF;
@@ -99,6 +100,12 @@ public partial class App : System.Windows.Application
             "BazaarOverlay", "bazaar.db");
         Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
 
+        // Configuration
+        var configuration = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
+            .Build();
+        services.AddSingleton<IConfiguration>(configuration);
+
         services.AddDbContext<BazaarDbContext>(options =>
             options.UseSqlite($"Data Source={dbPath}",
                 o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
@@ -124,6 +131,8 @@ public partial class App : System.Windows.Application
         services.AddScoped<IScreenCaptureService, ScreenCaptureService>();
         services.AddScoped<IOcrService, WindowsOcrService>();
         services.AddScoped<IBazaarDbLookupService, BazaarDbLookupService>();
+        services.AddSingleton<IOcrCaptureConfig>(sp =>
+            new OcrCaptureConfig(sp.GetRequiredService<IConfiguration>()));
         services.AddScoped<IOverlayOrchestrator, OverlayOrchestrator>();
         services.AddHttpClient();
         services.AddLogging(builder =>
