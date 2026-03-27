@@ -1,3 +1,4 @@
+using BazaarOverlay.Application.DTOs;
 using BazaarOverlay.Application.Interfaces;
 using BazaarOverlay.Application.ViewModels;
 
@@ -8,6 +9,7 @@ public class OverlayOrchestrator : IOverlayOrchestrator
     private const int CaptureWidth = 400;
     private const int CaptureAbove = 350;
     private const int CaptureBelow = 100;
+    private const int ProximityRadius = 400;
 
     private readonly IScreenCaptureService _captureService;
     private readonly IOcrService _ocrService;
@@ -46,9 +48,19 @@ public class OverlayOrchestrator : IOverlayOrchestrator
 
     private (int x, int y, int width, int height) GetFullScreenDimensions()
     {
-        // Return primary screen dimensions (defaults to 1920x1080)
-        // In production, this would be obtained from IScreenProvider if more flexibility is needed
         return (0, 0, 1920, 1080);
+    }
+
+    private static IReadOnlyList<string> FilterAndSortOcrLines(
+        IReadOnlyList<OcrTextLine> ocrLines, double relativeCursorX, double relativeCursorY)
+    {
+        return ocrLines
+            .Where(line =>
+                Math.Abs(line.CenterX - relativeCursorX) < ProximityRadius &&
+                Math.Abs(line.CenterY - relativeCursorY) < ProximityRadius)
+            .OrderByDescending(line => line.AverageWordHeight)
+            .Select(line => line.Text)
+            .ToList();
     }
 
     public async Task HandleHotkeyAsync()
@@ -71,7 +83,12 @@ public class OverlayOrchestrator : IOverlayOrchestrator
 
         var imageData = _captureService.CaptureRegion(captureX, captureY, captureWidth, captureHeight);
         var ocrLines = await _ocrService.RecognizeTextAsync(imageData);
-        var entityName = _nameExtractor.ExtractName(ocrLines);
+
+        var relativeCursorX = cursorX - captureX;
+        var relativeCursorY = cursorY - captureY;
+        var nearbyLines = FilterAndSortOcrLines(ocrLines, relativeCursorX, relativeCursorY);
+
+        var entityName = _nameExtractor.ExtractName(nearbyLines);
 
         if (entityName is null)
             return;

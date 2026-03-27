@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices.WindowsRuntime;
+using BazaarOverlay.Application.DTOs;
 using BazaarOverlay.Application.Interfaces;
 using Windows.Graphics.Imaging;
 using Windows.Media.Ocr;
@@ -8,11 +9,11 @@ namespace BazaarOverlay.Infrastructure.Ocr;
 
 public class WindowsOcrService : IOcrService
 {
-    public async Task<IReadOnlyList<string>> RecognizeTextAsync(byte[] imageData)
+    public async Task<IReadOnlyList<OcrTextLine>> RecognizeTextAsync(byte[] imageData)
     {
         var ocrEngine = OcrEngine.TryCreateFromUserProfileLanguages();
         if (ocrEngine is null)
-            return Array.Empty<string>();
+            return Array.Empty<OcrTextLine>();
 
         using var stream = new InMemoryRandomAccessStream();
         await stream.WriteAsync(imageData.AsBuffer()).AsTask().ConfigureAwait(false);
@@ -23,10 +24,15 @@ public class WindowsOcrService : IOcrService
 
         var result = await ocrEngine.RecognizeAsync(softwareBitmap).AsTask().ConfigureAwait(false);
 
-        // Sort by average word height descending so larger text (card names) comes first
         return result.Lines
-            .OrderByDescending(line => line.Words.Average(w => w.BoundingRect.Height))
-            .Select(line => line.Text)
+            .Select(line =>
+            {
+                var words = line.Words;
+                var avgHeight = words.Average(w => w.BoundingRect.Height);
+                var centerX = words.Average(w => w.BoundingRect.X + w.BoundingRect.Width / 2);
+                var centerY = words.Average(w => w.BoundingRect.Y + w.BoundingRect.Height / 2);
+                return new OcrTextLine(line.Text, avgHeight, centerX, centerY);
+            })
             .ToList();
     }
 }
