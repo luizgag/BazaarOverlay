@@ -8,7 +8,9 @@ public partial class HotkeyService : IDisposable
     private const int WM_HOTKEY = 0x0312;
     private const int MOD_CONTROL = 0x0002;
     private const int VK_D = 0x44;
+    private const int VK_H = 0x48;
     private const int HOTKEY_ID = 9000;
+    private const int HOTKEY_ID_MENU = 9001;
 
     [LibraryImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
@@ -22,6 +24,7 @@ public partial class HotkeyService : IDisposable
     private IntPtr _windowHandle;
 
     public event Action? HotkeyPressed;
+    public event Action? MenuHotkeyPressed;
 
     public void Register(IntPtr windowHandle)
     {
@@ -29,14 +32,24 @@ public partial class HotkeyService : IDisposable
         _hwndSource = HwndSource.FromHwnd(windowHandle);
         _hwndSource?.AddHook(WndProc);
         RegisterHotKey(windowHandle, HOTKEY_ID, MOD_CONTROL, VK_D);
+        RegisterHotKey(windowHandle, HOTKEY_ID_MENU, MOD_CONTROL, VK_H);
     }
 
     private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
-        if (msg == WM_HOTKEY && wParam.ToInt32() == HOTKEY_ID)
+        if (msg == WM_HOTKEY)
         {
-            HotkeyPressed?.Invoke();
-            handled = true;
+            int hotKeyId = wParam.ToInt32();
+            if (hotKeyId == HOTKEY_ID)
+            {
+                HotkeyPressed?.Invoke();
+                handled = true;
+            }
+            else if (hotKeyId == HOTKEY_ID_MENU)
+            {
+                MenuHotkeyPressed?.Invoke();
+                handled = true;
+            }
         }
         return IntPtr.Zero;
     }
@@ -44,6 +57,7 @@ public partial class HotkeyService : IDisposable
     public void Dispose()
     {
         UnregisterHotKey(_windowHandle, HOTKEY_ID);
+        UnregisterHotKey(_windowHandle, HOTKEY_ID_MENU);
         _hwndSource?.RemoveHook(WndProc);
         GC.SuppressFinalize(this);
     }

@@ -1,0 +1,17 @@
+[    1436ms] Error: Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at rX (https://bazaardb.gg/_next/static/chunks/4bd1b696-e5d7c65570c947b7.js:1:36659)
+    at is (https://bazaardb.gg/_next/static/chunks/4bd1b696-e5d7c65570c947b7.js:1:87560)
+    at sp (https://bazaardb.gg/_next/static/chunks/4bd1b696-e5d7c65570c947b7.js:1:128031)
+    at https://bazaardb.gg/_next/static/chunks/4bd1b696-e5d7c65570c947b7.js:1:122921
+    at sn (https://bazaardb.gg/_next/static/chunks/4bd1b696-e5d7c65570c947b7.js:1:123022)
+    at sQ (https://bazaardb.gg/_next/static/chunks/4bd1b696-e5d7c65570c947b7.js:1:149410)
+    at MessagePort.M (https://bazaardb.gg/_next/static/chunks/3794-337d1ca25ad99a89.js:1:41099)
+[    1778ms] [WARNING] fun-hooks: referenced 'firstPartyData' but it was never created @ https://s.nitropay.com/ads-2292.js:1
+[    2539ms] [ERROR] %c%d font-size:0;color:transparent NaN @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/hupk2/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0
+[    2539ms] [ERROR] %c%d font-size:0;color:transparent NaN @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/hupk2/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0
+[    2541ms] [WARNING] %c%d font-size:0;color:transparent NaN @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/hupk2/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0
+[    2542ms] [WARNING] %c%d font-size:0;color:transparent NaN @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/hupk2/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0
+[    2590ms] [WARNING] No available adapters. @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/hupk2/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0
+[    2719ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/pat/9e216f7d8b3bdebf/1774478617519/7f2cee3d7c942008a4f9bc3a5285664751dbe73e7a0ddd1a8b3257c0a49fd105/h-GzV7ggL8GwCZe:0
+[    2808ms] [ERROR]  Note that 'script-src' was not explicitly set, so 'default-src' is used as a fallback. @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/hupk2/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0
+[    6190ms] [WARNING] The resource https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/cmg/1 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/hupk2/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0

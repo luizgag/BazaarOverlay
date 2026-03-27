@@ -58,20 +58,30 @@ public partial class App : System.Windows.Application
         var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
         mainWindow.Show();
 
-        // Set up global hotkey
+        // Set up global hotkeys
         var hotkeyService = _serviceProvider.GetRequiredService<HotkeyService>();
         var windowHandle = new System.Windows.Interop.WindowInteropHelper(mainWindow).Handle;
         hotkeyService.Register(windowHandle);
+
+        // Ctrl+D: Capture and show card overlay
         hotkeyService.HotkeyPressed += async () =>
         {
             var orchestrator = _serviceProvider.GetRequiredService<IOverlayOrchestrator>();
             await orchestrator.HandleHotkeyAsync();
         };
 
+        // Ctrl+H: Toggle menu overlay visibility
+        hotkeyService.MenuHotkeyPressed += () =>
+        {
+            mainWindow.Visibility = mainWindow.Visibility == Visibility.Visible
+                ? Visibility.Hidden
+                : Visibility.Visible;
+        };
+
         // Pre-create overlay window (hidden)
         _serviceProvider.GetRequiredService<CardOverlayWindow>();
 
-        _logger.LogInformation("Overlay hotkey (Ctrl+D) registered");
+        _logger.LogInformation("Overlay hotkeys registered (Ctrl+D: card, Ctrl+H: menu)");
     }
 
     private static void ConfigureServices(IServiceCollection services)

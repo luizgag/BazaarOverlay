@@ -1,0 +1,26 @@
+[     667ms] [WARNING] fun-hooks: referenced 'firstPartyData' but it was never created @ https://s.nitropay.com/ads-2292.js:1
+[     943ms] [WARNING] [.WebGL-0xdfc00140a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels @ https://bazaardb.gg/:0
+[    1172ms] [ERROR] Access to fetch at 'https://api.rlcdn.com/api/identity/envelope?pid=14333' from origin 'https://bazaardb.gg' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ https://bazaardb.gg/:0
+[    1173ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://api.rlcdn.com/api/identity/envelope?pid=14333:0
+[    1875ms] [ERROR]  Note that 'script-src' was not explicitly set, so 'default-src' is used as a fallback. @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/22nlm/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0
+[    2030ms] [ERROR] %c%d font-size:0;color:transparent NaN @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/22nlm/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0
+[    2030ms] [ERROR] %c%d font-size:0;color:transparent NaN @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/22nlm/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0
+[    2033ms] [WARNING] %c%d font-size:0;color:transparent NaN @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/22nlm/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0
+[    2034ms] [WARNING] %c%d font-size:0;color:transparent NaN @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/22nlm/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0
+[    2114ms] [WARNING] No available adapters. @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/22nlm/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0
+[    2202ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/pat/9e212bf3ce7cca9a/1774475851159/b73dc4f8829756b6c143365d37bfd2fc16f43310620aa0d4cb1625ef08113829/fqB6Q87kdXgC2tb:0
+[    3545ms] [WARNING] [GPT] Using deprecated googletag.encryptedSignalProviders. Please use googletag.secureSignalProviders instead.
+https://goo.gle/gpt-message#155 @ https://securepubads.g.doubleclick.net/pagead/managed/js/gpt/m202603190101/pubads_impl.js:18
+[    4148ms] [ERROR] Failed to load resource: the server responded with a status of 451 () @ https://id.rlcdn.com/464246.gif?partner_uid=82d939b7-2393-4a10-97b8-82e67c64e8cc:0
+[    4420ms] [ERROR] Failed to load resource: net::ERR_NAME_NOT_RESOLVED @ https://log.dmtry.com/redir/1/0/4202/437920451/238252668/1/180/0/1006/1.ver?at=i&d=PxImp:0
+[    4422ms] [ERROR] Failed to load resource: net::ERR_NAME_NOT_RESOLVED @ https://js.dmtry.com/antenna2.js?0_4202_437920451_238252668:0
+[    4443ms] [ERROR] Failed to load resource: the server responded with a status of 451 () @ https://id.rlcdn.com/713074.gif?:0
+[    4539ms] [ERROR] Attestation check for Attribution Reporting on https://ad.doubleclick.net failed. @ https://bazaardb.gg/:0
+[    4762ms] [ERROR] Attestation check for Shared Storage on https://www.googleadservices.com failed. @ https://www.googleadservices.com/pagead/managed/js/activeview/current/reach_worklet.html:0
+[    4816ms] [ERROR] Attestation check for Attribution Reporting on https://ad.doubleclick.net failed. @ https://bazaardb.gg/:0
+[    4969ms] [WARNING] [GPT] Using deprecated googletag.encryptedSignalProviders. Please use googletag.secureSignalProviders instead.
+https://goo.gle/gpt-message#155 @ https://securepubads.g.doubleclick.net/pagead/managed/js/gpt/m202603190101/pubads_impl.js:18
+[    5226ms] [ERROR] Failed to load resource: the server responded with a status of 451 () @ https://idsync.rlcdn.com/420486.gif?partner_uid=1C69B024-07F4-4E17-99C6-086797AF95FE:0
+[    4443ms] [ERROR] Failed to load resource: the server responded with a status of 451 () @ https://id.rlcdn.com/713074.gif?:0
+[   16262ms] [WARNING] The resource https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/cmg/1 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/22nlm/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0
+[    5660ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ https://match.prod.bidr.io/cookie-sync/rp?bee_sync_partners=rp&gdpr_consent=1---&_bee_ppp=1:0

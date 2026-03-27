@@ -1,0 +1,6 @@
+[     563ms] [WARNING] fun-hooks: referenced 'firstPartyData' but it was never created @ https://s.nitropay.com/ads-2292.js:1
+[    1584ms] [WARNING] [GPT] Using deprecated googletag.encryptedSignalProviders. Please use googletag.secureSignalProviders instead.
+https://goo.gle/gpt-message#155 @ https://securepubads.g.doubleclick.net/pagead/managed/js/gpt/m202603190101/pubads_impl.js:18
+[    2586ms] [WARNING] [GPT] Using deprecated googletag.encryptedSignalProviders. Please use googletag.secureSignalProviders instead.
+https://goo.gle/gpt-message#155 @ https://securepubads.g.doubleclick.net/pagead/managed/js/gpt/m202603190101/pubads_impl.js:18
+[    2811ms] [ERROR] Failed to load resource: the server responded with a status of 502 () @ https://bazaardb.gg/quixel/api/send:0

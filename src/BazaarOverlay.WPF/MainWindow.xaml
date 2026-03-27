@@ -10,6 +10,7 @@
         WindowStyle="None"
         AllowsTransparency="True"
         Topmost="True"
+        Visibility="Hidden"
         Background="Transparent"
         ResizeMode="CanResizeWithGrip"
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}">

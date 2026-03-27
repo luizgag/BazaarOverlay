@@ -1,0 +1,17 @@
+[    1295ms] [WARNING] fun-hooks: referenced 'firstPartyData' but it was never created @ https://s.nitropay.com/ads-2292.js:1
+[    1963ms] [WARNING] No available adapters. @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/wa7xx/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0
+[    2054ms] [ERROR]  Note that 'script-src' was not explicitly set, so 'default-src' is used as a fallback. @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/wa7xx/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0
+[    2205ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/pat/9e28de87f8f6ca86/1774556566073/959898edbedcb1d8762cf4b5a723b50e5b180deaddff1031458638bfae71dfb2/E1jCAhuP7uyXoU2:0
+[    2277ms] [WARNING] [GPT] Using deprecated googletag.encryptedSignalProviders. Please use googletag.secureSignalProviders instead.
+https://goo.gle/gpt-message#155 @ https://securepubads.g.doubleclick.net/pagead/managed/js/gpt/m202603190101/pubads_impl.js:18
+[    2428ms] [ERROR] %c%d font-size:0;color:transparent NaN @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/wa7xx/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0
+[    2428ms] [ERROR] %c%d font-size:0;color:transparent NaN @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/wa7xx/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0
+[    2430ms] [WARNING] %c%d font-size:0;color:transparent NaN @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/wa7xx/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0
+[    2430ms] [WARNING] %c%d font-size:0;color:transparent NaN @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/wa7xx/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0
+[    3279ms] [WARNING] [GPT] Using deprecated googletag.encryptedSignalProviders. Please use googletag.secureSignalProviders instead.
+https://goo.gle/gpt-message#155 @ https://securepubads.g.doubleclick.net/pagead/managed/js/gpt/m202603190101/pubads_impl.js:18
+[    5769ms] [WARNING] The resource https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/cmg/1 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/wa7xx/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0
+[    8921ms] [ERROR] Failed to load resource: net::ERR_NAME_NOT_RESOLVED @ https://sync.extend.tv/r.gif?exchange=liveramp&ZUID=3975146462424393597:0
+[    8926ms] [ERROR] Failed to load resource: net::ERR_NAME_NOT_RESOLVED @ https://beacon.krxd.net/usermatch.gif?adnxs_uid=3975146462424393597:0
+[    8933ms] [ERROR] Failed to load resource: net::ERR_NAME_NOT_RESOLVED @ https://farm.plista.com/matching/pixel/?ssp=c3de&dsp_user_id=3975146462424393597:0
+[    9758ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://cksync.yahoo.co.jp/dispatch?ptr=10901:0

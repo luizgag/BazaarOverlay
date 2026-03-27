@@ -1,0 +1,17 @@
+[     515ms] [WARNING] fun-hooks: referenced 'firstPartyData' but it was never created @ https://s.nitropay.com/ads-2292.js:1
+[    1322ms] [WARNING] No available adapters. @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/lx30s/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0
+[    1411ms] [ERROR] %c%d font-size:0;color:transparent NaN @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/lx30s/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0
+[    1411ms] [ERROR] %c%d font-size:0;color:transparent NaN @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/lx30s/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0
+[    1413ms] [WARNING] %c%d font-size:0;color:transparent NaN @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/lx30s/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0
+[    1413ms] [WARNING] %c%d font-size:0;color:transparent NaN @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/lx30s/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0
+[    1460ms] [ERROR]  Note that 'script-src' was not explicitly set, so 'default-src' is used as a fallback. @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/lx30s/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0
+[    1598ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/pat/9e213c315bb7caab/1774476516453/72531c952dc89b91e806212dfe9fa5165b420ef3f928a80c104259aa66057377/39eFOKLlk0bvx1j:0
+[    4985ms] [WARNING] The resource https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/cmg/1 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/g/turnstile/f/ov2/av0/rch/lx30s/0x4AAAAAACP0OhK4c4s3KZ3O/auto/fbE/new/invisible?lang=auto:0
+[   31579ms] [ERROR] Failed to load resource: the server responded with a status of 500 () @ https://bazaardb.gg/card/py8ycyzvx7yg6xk05lj73jdyx/Trapping-Pit:0
+[   29496ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://bazaardb.gg/api/search?c=items&limit=1:0
+[   29567ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://bazaardb.gg/api/cards?limit=1:0
+[   29569ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://bazaardb.gg/api/v1/search?c=items:0
+[   29571ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://bazaardb.gg/api/items?limit=1:0
+[   31876ms] [ERROR] Attestation check for Shared Storage on https://www.googleadservices.com failed. @ https://www.googleadservices.com/pagead/managed/js/activeview/current/reach_worklet.html:0
+[   32052ms] [ERROR] Attestation check for Attribution Reporting on https://ad.doubleclick.net failed. @ https://bazaardb.gg/card/4k4n5d9g1c9ydpt7c1gy7wg72q/Banannibal:0
+[   32106ms] [ERROR] Attestation check for Attribution Reporting on https://ad.doubleclick.net failed. @ https://bazaardb.gg/card/4k4n5d9g1c9ydpt7c1gy7wg72q/Banannibal:0
