@@ -66,4 +66,75 @@ public class TooltipNameExtractorTests
 
         result.ShouldBe("Pigomorph");
     }
+
+    [Fact]
+    public void ExtractName_SkipsLineStartingWithSells()
+    {
+        var lines = new[] { "Sells Medium Items", "Mittel" };
+
+        var result = _extractor.ExtractName(lines);
+
+        result.ShouldBe("Mittel");
+    }
+
+    [Fact]
+    public void ExtractName_SkipsSingleWordSells()
+    {
+        var lines = new[] { "Sells", "Mittel" };
+
+        var result = _extractor.ExtractName(lines);
+
+        result.ShouldBe("Mittel");
+    }
+
+    [Fact]
+    public void ExtractName_SkipsLineContainingColon()
+    {
+        var lines = new[] { "Tier: Gold", "Pigomorph" };
+
+        var result = _extractor.ExtractName(lines);
+
+        result.ShouldBe("Pigomorph");
+    }
+
+    [Fact]
+    public void ExtractName_SkipsStatModifierLines()
+    {
+        var lines = new[] { "+50% damage", "Pigomorph" };
+
+        var result = _extractor.ExtractName(lines);
+
+        result.ShouldBe("Pigomorph");
+    }
+
+    [Fact]
+    public void ExtractName_SkipsNumericLines()
+    {
+        var lines = new[] { "2650", "Pigomorph" };
+
+        var result = _extractor.ExtractName(lines);
+
+        result.ShouldBe("Pigomorph");
+    }
+
+    [Fact]
+    public void ExtractName_MultiWordName()
+    {
+        var lines = new[] { "Ray Vahn", "Sells Large Items" };
+
+        var result = _extractor.ExtractName(lines);
+
+        result.ShouldBe("Ray Vahn");
+    }
+
+    [Fact]
+    public void ExtractName_AllDescriptionLines_FallsBackToFirst()
+    {
+        var lines = new[] { "Sells Medium Items", "Tier: Gold" };
+
+        var result = _extractor.ExtractName(lines);
+
+        result.ShouldBe("Sells Medium Items");
+    }
+
 }

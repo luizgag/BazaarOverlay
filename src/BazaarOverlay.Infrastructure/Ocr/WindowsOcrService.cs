@@ -23,6 +23,10 @@ public class WindowsOcrService : IOcrService
 
         var result = await ocrEngine.RecognizeAsync(softwareBitmap).AsTask().ConfigureAwait(false);
 
-        return result.Lines.Select(line => line.Text).ToList();
+        // Sort by average word height descending so larger text (card names) comes first
+        return result.Lines
+            .OrderByDescending(line => line.Words.Average(w => w.BoundingRect.Height))
+            .Select(line => line.Text)
+            .ToList();
     }
 }

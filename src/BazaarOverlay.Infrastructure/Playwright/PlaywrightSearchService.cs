@@ -29,7 +29,7 @@ public class PlaywrightSearchService : IPlaywrightSearchService
         try
         {
             var encodedName = HttpUtility.UrlEncode(name);
-            var searchUrl = $"https://bazaardb.gg/search?q={encodedName}";
+            var searchUrl = $"https://bazaardb.gg/search?c=all&q={encodedName}";
             _logger.LogInformation("Searching bazaardb.gg for: {Name}", name);
 
             await page.GotoAsync(searchUrl, new()
