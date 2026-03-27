@@ -141,7 +141,7 @@ public partial class App : System.Windows.Application
         // Overlay components
         services.AddSingleton<CardOverlayViewModel>();
         services.AddSingleton<CardOverlayWindow>();
-        services.AddSingleton<DebugRectWindow>();
+        services.AddSingleton<IDebugRectWindow, DebugRectWindow>();
         services.AddSingleton<HotkeyService>();
 
         // ViewModels
