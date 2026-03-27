@@ -13,12 +13,13 @@ public class OverlayOrchestratorTests
     private readonly ITooltipNameExtractor _nameExtractor = Substitute.For<ITooltipNameExtractor>();
     private readonly IBazaarDbLookupService _lookupService = Substitute.For<IBazaarDbLookupService>();
     private readonly CardOverlayViewModel _viewModel = new();
+    private readonly IDebugRectWindow _debugRectWindow = Substitute.For<IDebugRectWindow>();
     private readonly OverlayOrchestrator _orchestrator;
 
     public OverlayOrchestratorTests()
     {
         _orchestrator = new OverlayOrchestrator(
-            _captureService, _ocrService, _nameExtractor, _lookupService, _viewModel);
+            _captureService, _ocrService, _nameExtractor, _lookupService, _viewModel, _debugRectWindow);
     }
 
     [Fact]

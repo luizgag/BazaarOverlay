@@ -1,0 +1,14 @@
+<Window x:Class="BazaarOverlay.WPF.Views.DebugRectWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Debug Rect"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ShowInTaskbar="False"
+        ResizeMode="NoResize"
+        Focusable="False"
+        IsHitTestVisible="False">
+    <Border BorderBrush="#FFFF00FF" BorderThickness="2" Background="Transparent" Opacity="0.7"/>
+</Window>

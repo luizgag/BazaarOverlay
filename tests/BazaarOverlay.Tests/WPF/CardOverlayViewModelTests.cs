@@ -45,4 +45,31 @@ public class CardOverlayViewModelTests
         _vm.Left.ShouldBe(300);
         _vm.Top.ShouldBe(400);
     }
+
+    [Fact]
+    public void InitialState_DebugRectIsNotVisible()
+    {
+        _vm.DebugRectVisible.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void ShowDebugRect_SetsPositionAndVisibility()
+    {
+        _vm.ShowDebugRect(50, 100, 400, 450);
+
+        _vm.DebugRectVisible.ShouldBeTrue();
+        _vm.DebugRectX.ShouldBe(50);
+        _vm.DebugRectY.ShouldBe(100);
+        _vm.DebugRectWidth.ShouldBe(400);
+        _vm.DebugRectHeight.ShouldBe(450);
+    }
+
+    [Fact]
+    public void HideDebugRect_ClearsVisibility()
+    {
+        _vm.ShowDebugRect(50, 100, 400, 450);
+        _vm.HideDebugRect();
+
+        _vm.DebugRectVisible.ShouldBeFalse();
+    }
 }

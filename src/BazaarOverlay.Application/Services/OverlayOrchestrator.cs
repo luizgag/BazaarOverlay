@@ -14,19 +14,22 @@ public class OverlayOrchestrator : IOverlayOrchestrator
     private readonly ITooltipNameExtractor _nameExtractor;
     private readonly IBazaarDbLookupService _lookupService;
     private readonly CardOverlayViewModel _viewModel;
+    private readonly IDebugRectWindow _debugRectWindow;
 
     public OverlayOrchestrator(
         IScreenCaptureService captureService,
         IOcrService ocrService,
         ITooltipNameExtractor nameExtractor,
         IBazaarDbLookupService lookupService,
-        CardOverlayViewModel viewModel)
+        CardOverlayViewModel viewModel,
+        IDebugRectWindow debugRectWindow)
     {
         _captureService = captureService;
         _ocrService = ocrService;
         _nameExtractor = nameExtractor;
         _lookupService = lookupService;
         _viewModel = viewModel;
+        _debugRectWindow = debugRectWindow;
     }
 
     public async Task HandleHotkeyAsync()
@@ -34,6 +37,7 @@ public class OverlayOrchestrator : IOverlayOrchestrator
         if (_viewModel.IsVisible)
         {
             _viewModel.Hide();
+            _debugRectWindow.Hide();
             return;
         }
 
@@ -53,6 +57,10 @@ public class OverlayOrchestrator : IOverlayOrchestrator
         var cardUrl = await _lookupService.GetCardUrlAsync(entityName);
         if (cardUrl is null)
             return;
+
+        // Show debug rectangle around capture region
+        _viewModel.ShowDebugRect(captureX, captureY, CaptureWidth, captureHeight);
+        _debugRectWindow.ShowRectangle(captureX, captureY, CaptureWidth, captureHeight);
 
         _viewModel.ShowCard(cardUrl, cursorX + 20, cursorY - 100);
     }
