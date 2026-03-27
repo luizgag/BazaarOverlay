@@ -14,12 +14,14 @@ public class OverlayOrchestratorTests
     private readonly IBazaarDbLookupService _lookupService = Substitute.For<IBazaarDbLookupService>();
     private readonly CardOverlayViewModel _viewModel = new();
     private readonly IDebugRectWindow _debugRectWindow = Substitute.For<IDebugRectWindow>();
+    private readonly IOcrCaptureConfig _captureConfig = Substitute.For<IOcrCaptureConfig>();
     private readonly OverlayOrchestrator _orchestrator;
 
     public OverlayOrchestratorTests()
     {
+        _captureConfig.CaptureMode.Returns(OcrCaptureModeEnum.Rectangle);
         _orchestrator = new OverlayOrchestrator(
-            _captureService, _ocrService, _nameExtractor, _lookupService, _viewModel, _debugRectWindow);
+            _captureService, _ocrService, _nameExtractor, _lookupService, _viewModel, _debugRectWindow, _captureConfig);
     }
 
     [Fact]
@@ -113,5 +115,33 @@ public class OverlayOrchestratorTests
         // 400px wide centered on cursor: x = 500 - 200 = 300
         // 350px above cursor + 100px below: y = 400 - 350 = 50, height = 450
         _captureService.Received(1).CaptureRegion(300, 50, 400, 450);
+    }
+
+    [Fact]
+    public async Task HandleHotkeyAsync_WhenCaptureModeIsFullScreen_CapturesEntireScreen()
+    {
+        // Arrange
+        var mockCaptureConfig = Substitute.For<IOcrCaptureConfig>();
+        mockCaptureConfig.CaptureMode.Returns(OcrCaptureModeEnum.FullScreen);
+
+        var orchestrator = new OverlayOrchestrator(
+            _captureService, _ocrService, _nameExtractor, _lookupService, _viewModel, _debugRectWindow, mockCaptureConfig);
+
+        _captureService.GetCursorPosition().Returns((100, 100));
+        _captureService.CaptureRegion(0, 0, 1920, 1080).Returns(new byte[] { });
+        _ocrService.RecognizeTextAsync(Arg.Any<byte[]>())
+            .Returns(new List<string> { "card", "name" });
+        _nameExtractor.ExtractName(Arg.Any<IReadOnlyList<string>>())
+            .Returns("CardName");
+        _lookupService.GetCardUrlAsync("CardName")
+            .Returns("https://example.com/card");
+
+        // Act
+        await orchestrator.HandleHotkeyAsync();
+
+        // Assert
+        _captureService.Received(1).CaptureRegion(0, 0, 1920, 1080);
+        _viewModel.IsVisible.ShouldBeTrue();
+        _viewModel.CardUrl.ShouldBe("https://example.com/card");
     }
 }
