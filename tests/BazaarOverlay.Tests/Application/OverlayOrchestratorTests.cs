@@ -144,4 +144,32 @@ public class OverlayOrchestratorTests
         _viewModel.IsVisible.ShouldBeTrue();
         _viewModel.CardUrl.ShouldBe("https://example.com/card");
     }
+
+    [Fact]
+    public async Task HandleHotkeyAsync_WhenCaptureModeIsRectangle_CapturesRegionAroundCursor()
+    {
+        // Arrange
+        var mockCaptureConfig = Substitute.For<IOcrCaptureConfig>();
+        mockCaptureConfig.CaptureMode.Returns(OcrCaptureModeEnum.Rectangle);
+
+        var orchestrator = new OverlayOrchestrator(
+            _captureService, _ocrService, _nameExtractor, _lookupService, _viewModel, _debugRectWindow, mockCaptureConfig);
+
+        _captureService.GetCursorPosition().Returns((500, 500));
+        _captureService.CaptureRegion(300, 150, 400, 450).Returns(new byte[] { });
+        _ocrService.RecognizeTextAsync(Arg.Any<byte[]>())
+            .Returns(new List<string> { "card", "name" });
+        _nameExtractor.ExtractName(Arg.Any<IReadOnlyList<string>>())
+            .Returns("CardName");
+        _lookupService.GetCardUrlAsync("CardName")
+            .Returns("https://example.com/card");
+
+        // Act
+        await orchestrator.HandleHotkeyAsync();
+
+        // Assert
+        _captureService.Received(1).CaptureRegion(300, 150, 400, 450);
+        _viewModel.IsVisible.ShouldBeTrue();
+        _viewModel.CardUrl.ShouldBe("https://example.com/card");
+    }
 }
