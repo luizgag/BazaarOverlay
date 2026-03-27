@@ -16,12 +16,13 @@ public class CardUrlCacheRepository : ICardUrlCacheRepository
     public async Task<CardUrlCache?> GetByNameAsync(string name)
     {
         return await _context.CardUrlCaches
-            .FirstOrDefaultAsync(c => c.Name.ToLower() == name.ToLower());
+            .FirstOrDefaultAsync(c => c.Name.ToLower() == name.ToLower())
+            .ConfigureAwait(false);
     }
 
     public async Task SaveAsync(CardUrlCache entry)
     {
-        await _context.CardUrlCaches.AddAsync(entry);
-        await _context.SaveChangesAsync();
+        await _context.CardUrlCaches.AddAsync(entry).ConfigureAwait(false);
+        await _context.SaveChangesAsync().ConfigureAwait(false);
     }
 }

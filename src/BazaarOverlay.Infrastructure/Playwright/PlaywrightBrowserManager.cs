@@ -18,19 +18,19 @@ public class PlaywrightBrowserManager : IPlaywrightBrowserManager
 
     public async Task<IBrowserContext> GetBrowserContextAsync()
     {
-        await _lock.WaitAsync();
+        await _lock.WaitAsync().ConfigureAwait(false);
         try
         {
             if (_context is not null)
                 return _context;
 
             _logger.LogInformation("Launching headless Playwright Chromium...");
-            _playwright = await Microsoft.Playwright.Playwright.CreateAsync();
+            _playwright = await Microsoft.Playwright.Playwright.CreateAsync().ConfigureAwait(false);
             _browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
             {
                 Headless = true
-            });
-            _context = await _browser.NewContextAsync();
+            }).ConfigureAwait(false);
+            _context = await _browser.NewContextAsync().ConfigureAwait(false);
             _logger.LogInformation("Playwright browser context ready");
             return _context;
         }
@@ -42,8 +42,8 @@ public class PlaywrightBrowserManager : IPlaywrightBrowserManager
 
     public async ValueTask DisposeAsync()
     {
-        if (_context is not null) await _context.DisposeAsync();
-        if (_browser is not null) await _browser.DisposeAsync();
+        if (_context is not null) await _context.DisposeAsync().ConfigureAwait(false);
+        if (_browser is not null) await _browser.DisposeAsync().ConfigureAwait(false);
         _playwright?.Dispose();
         _lock.Dispose();
         GC.SuppressFinalize(this);

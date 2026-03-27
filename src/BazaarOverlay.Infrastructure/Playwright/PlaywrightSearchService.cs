@@ -1,5 +1,6 @@
 using System.Web;
 using Microsoft.Extensions.Logging;
+using Microsoft.Playwright;
 
 namespace BazaarOverlay.Infrastructure.Playwright;
 
@@ -16,10 +17,14 @@ public class PlaywrightSearchService : IPlaywrightSearchService
         _logger = logger;
     }
 
+    private const string ResultSelector = "a[href^='/items/'], a[href^='/skills/'], a[href^='/monsters/'], a[href^='/encounters/']";
+    private const int NavigationTimeoutMs = 15_000;
+    private const int SelectorTimeoutMs = 5_000;
+
     public async Task<(string? CardUrl, string? Category)> SearchAsync(string name)
     {
-        var context = await _browserManager.GetBrowserContextAsync();
-        var page = await context.NewPageAsync();
+        var context = await _browserManager.GetBrowserContextAsync().ConfigureAwait(false);
+        var page = await context.NewPageAsync().ConfigureAwait(false);
 
         try
         {
@@ -27,17 +32,34 @@ public class PlaywrightSearchService : IPlaywrightSearchService
             var searchUrl = $"https://bazaardb.gg/search?q={encodedName}";
             _logger.LogInformation("Searching bazaardb.gg for: {Name}", name);
 
-            await page.GotoAsync(searchUrl, new() { WaitUntil = Microsoft.Playwright.WaitUntilState.NetworkIdle });
+            await page.GotoAsync(searchUrl, new()
+            {
+                WaitUntil = WaitUntilState.DOMContentLoaded,
+                Timeout = NavigationTimeoutMs
+            }).ConfigureAwait(false);
 
-            // Wait for search results to render
-            var firstResult = await page.QuerySelectorAsync("a[href^='/items/'], a[href^='/skills/'], a[href^='/monsters/'], a[href^='/encounters/']");
+            // Wait for search results to render (with timeout instead of NetworkIdle)
+            IElementHandle? firstResult;
+            try
+            {
+                firstResult = await page.WaitForSelectorAsync(ResultSelector, new()
+                {
+                    Timeout = SelectorTimeoutMs
+                }).ConfigureAwait(false);
+            }
+            catch (PlaywrightException)
+            {
+                _logger.LogWarning("No search results found for: {Name}", name);
+                return (null, null);
+            }
+
             if (firstResult is null)
             {
                 _logger.LogWarning("No search results found for: {Name}", name);
                 return (null, null);
             }
 
-            var href = await firstResult.GetAttributeAsync("href");
+            var href = await firstResult.GetAttributeAsync("href").ConfigureAwait(false);
             if (string.IsNullOrEmpty(href))
                 return (null, null);
 
@@ -50,7 +72,7 @@ public class PlaywrightSearchService : IPlaywrightSearchService
         }
         finally
         {
-            await page.CloseAsync();
+            await page.CloseAsync().ConfigureAwait(false);
         }
     }
 }

@@ -15,13 +15,13 @@ public class WindowsOcrService : IOcrService
             return Array.Empty<string>();
 
         using var stream = new InMemoryRandomAccessStream();
-        await stream.WriteAsync(imageData.AsBuffer());
+        await stream.WriteAsync(imageData.AsBuffer()).AsTask().ConfigureAwait(false);
         stream.Seek(0);
 
-        var decoder = await BitmapDecoder.CreateAsync(stream);
-        var softwareBitmap = await decoder.GetSoftwareBitmapAsync();
+        var decoder = await BitmapDecoder.CreateAsync(stream).AsTask().ConfigureAwait(false);
+        var softwareBitmap = await decoder.GetSoftwareBitmapAsync().AsTask().ConfigureAwait(false);
 
-        var result = await ocrEngine.RecognizeAsync(softwareBitmap);
+        var result = await ocrEngine.RecognizeAsync(softwareBitmap).AsTask().ConfigureAwait(false);
 
         return result.Lines.Select(line => line.Text).ToList();
     }

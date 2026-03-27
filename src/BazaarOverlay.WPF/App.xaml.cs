@@ -66,8 +66,16 @@ public partial class App : System.Windows.Application
         // Ctrl+D: Capture and show card overlay
         hotkeyService.HotkeyPressed += async () =>
         {
-            var orchestrator = _serviceProvider.GetRequiredService<IOverlayOrchestrator>();
-            await orchestrator.HandleHotkeyAsync();
+            try
+            {
+                using var scope = _serviceProvider.CreateScope();
+                var orchestrator = scope.ServiceProvider.GetRequiredService<IOverlayOrchestrator>();
+                await orchestrator.HandleHotkeyAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Error handling Ctrl+D hotkey");
+            }
         };
 
         // Ctrl+H: Toggle menu overlay visibility

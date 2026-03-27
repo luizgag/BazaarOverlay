@@ -19,16 +19,16 @@ public class BazaarDbLookupService : IBazaarDbLookupService
 
     public async Task<string?> GetCardUrlAsync(string name)
     {
-        var cached = await _cacheRepository.GetByNameAsync(name);
+        var cached = await _cacheRepository.GetByNameAsync(name).ConfigureAwait(false);
         if (cached is not null)
             return cached.CardUrl;
 
-        var (cardUrl, category) = await _searchService.SearchAsync(name);
+        var (cardUrl, category) = await _searchService.SearchAsync(name).ConfigureAwait(false);
         if (cardUrl is null)
             return null;
 
         var entry = new CardUrlCache(name, cardUrl, category);
-        await _cacheRepository.SaveAsync(entry);
+        await _cacheRepository.SaveAsync(entry).ConfigureAwait(false);
 
         return cardUrl;
     }
