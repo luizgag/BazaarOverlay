@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.1" />
     <PackageReference Include="coverlet.collector" Version="6.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.5" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.5" />
@@ -27,6 +28,7 @@
     <ProjectReference Include="..\..\src\BazaarOverlay.Domain\BazaarOverlay.Domain.csproj" />
     <ProjectReference Include="..\..\src\BazaarOverlay.Application\BazaarOverlay.Application.csproj" />
     <ProjectReference Include="..\..\src\BazaarOverlay.Infrastructure\BazaarOverlay.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\BazaarOverlay.WPF\BazaarOverlay.WPF.csproj" />
   </ItemGroup>
 
 </Project>
