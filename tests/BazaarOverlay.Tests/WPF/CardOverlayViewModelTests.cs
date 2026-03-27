@@ -1,4 +1,4 @@
-using BazaarOverlay.WPF.ViewModels;
+using BazaarOverlay.Application.ViewModels;
 using Shouldly;
 
 namespace BazaarOverlay.Tests.WPF;

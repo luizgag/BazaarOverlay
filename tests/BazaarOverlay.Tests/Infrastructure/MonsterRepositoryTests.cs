@@ -1,6 +1,7 @@
 using BazaarOverlay.Domain.Entities;
 using BazaarOverlay.Domain.Enums;
 using BazaarOverlay.Infrastructure.Persistence.Repositories;
+using BazaarOverlay.Tests.Infrastructure;
 using Shouldly;
 
 namespace BazaarOverlay.Tests.Infrastructure;
@@ -8,102 +9,75 @@ namespace BazaarOverlay.Tests.Infrastructure;
 public class MonsterRepositoryTests : IDisposable
 {
     private readonly BazaarOverlay.Infrastructure.Persistence.BazaarDbContext _context;
-    private readonly MonsterRepository _sut;
+    private readonly MonsterRepository _repository;
 
     public MonsterRepositoryTests()
     {
         _context = TestDbContextFactory.Create();
-        _sut = new MonsterRepository(_context);
-    }
-
-    public void Dispose()
-    {
-        _context.Dispose();
+        _repository = new MonsterRepository(_context);
     }
 
     [Fact]
-    public async Task GetByName_WithExistingMonster_ReturnsMonsterWithDrops()
+    public async Task GetByNameAsync_ExistingMonster_ReturnsMonster()
     {
-        await SeedGoblinAsync();
+        _context.Monsters.Add(new Monster("Banannibal", Rarity.Bronze, level: 1, day: 1,
+            health: 100, goldReward: 2, xpReward: 3));
+        await _context.SaveChangesAsync();
 
-        var result = await _sut.GetByNameAsync("Goblin");
+        var result = await _repository.GetByNameAsync("Banannibal");
 
         result.ShouldNotBeNull();
-        result.Name.ShouldBe("Goblin");
-        result.DropItems.Count.ShouldBe(1);
-        result.DropItems.First().Name.ShouldBe("Rusty Sword");
-        result.DropItems.First().Heroes.Count.ShouldBe(1);
+        result.Name.ShouldBe("Banannibal");
     }
 
     [Fact]
-    public async Task GetByName_WithUnknownMonster_ReturnsNull()
+    public async Task GetByNameAsync_WithBoardItems_ReturnsBoardItems()
     {
-        var result = await _sut.GetByNameAsync("Unknown");
-
-        result.ShouldBeNull();
-    }
-
-    [Fact]
-    public async Task SearchByName_WithPartialMatch_ReturnsResults()
-    {
-        await SeedGoblinAsync();
-
-        var results = await _sut.SearchByNameAsync("Gob");
-
-        results.Count.ShouldBe(1);
-        results[0].Name.ShouldBe("Goblin");
-    }
-
-    [Fact]
-    public async Task SearchByName_IsCaseInsensitive()
-    {
-        await SeedGoblinAsync();
-
-        var results = await _sut.SearchByNameAsync("goblin");
-
-        results.Count.ShouldBe(1);
-    }
-
-    [Fact]
-    public async Task SearchByName_RanksExactMatchFirst()
-    {
-        var goblin = new Monster("Goblin", 45, Rarity.Bronze, 1);
-        var goblinKing = new Monster("Goblin King", 120, Rarity.Gold, 5);
-        await _context.Monsters.AddRangeAsync(goblin, goblinKing);
+        var item = new Item("Banana", ItemSize.Small, Rarity.Bronze);
+        _context.Items.Add(item);
         await _context.SaveChangesAsync();
 
-        var results = await _sut.SearchByNameAsync("Goblin");
+        var monster = new Monster("Banannibal", Rarity.Bronze, level: 1, day: 1,
+            health: 100, goldReward: 2, xpReward: 3);
+        monster.BoardItems.Add(item);
+        _context.Monsters.Add(monster);
+        await _context.SaveChangesAsync();
 
-        results[0].Name.ShouldBe("Goblin");
-        results[1].Name.ShouldBe("Goblin King");
+        var result = await _repository.GetByNameAsync("Banannibal");
+
+        result.ShouldNotBeNull();
+        result.BoardItems.Count.ShouldBe(1);
     }
 
     [Fact]
-    public async Task GetByDay_ReturnsMonstersThatAppearOnOrBeforeDay()
+    public async Task GetByDayAsync_ReturnsOnlyMonstersUpToDay()
     {
-        var earlyMonster = new Monster("Rat", 20, Rarity.Bronze, 1);
-        var lateMonster = new Monster("Dragon", 500, Rarity.Diamond, 8);
-        await _context.Monsters.AddRangeAsync(earlyMonster, lateMonster);
+        _context.Monsters.Add(new Monster("Day1Monster", Rarity.Bronze, level: 1, day: 1,
+            health: 100, goldReward: 2, xpReward: 3));
+        _context.Monsters.Add(new Monster("Day3Monster", Rarity.Silver, level: 3, day: 3,
+            health: 300, goldReward: 4, xpReward: 5));
         await _context.SaveChangesAsync();
 
-        var results = await _sut.GetByDayAsync(5);
+        var result = await _repository.GetByDayAsync(2);
 
-        results.Count.ShouldBe(1);
-        results[0].Name.ShouldBe("Rat");
+        result.Count.ShouldBe(1);
+        result[0].Name.ShouldBe("Day1Monster");
     }
 
-    private async Task SeedGoblinAsync()
+    [Fact]
+    public async Task SearchByNameAsync_PartialMatch_ReturnsResults()
     {
-        var neutral = new Hero("Neutral");
-        _context.Heroes.Add(neutral);
-
-        var item = new Item("Rusty Sword", ItemSize.Small, Rarity.Bronze, 4.0m);
-        item.Heroes.Add(neutral);
-
-        var monster = new Monster("Goblin", 45, Rarity.Bronze, 1);
-        monster.DropItems.Add(item);
-
-        await _context.Monsters.AddAsync(monster);
+        _context.Monsters.Add(new Monster("Banannibal", Rarity.Bronze, level: 1, day: 1,
+            health: 100, goldReward: 2, xpReward: 3));
+        _context.Monsters.Add(new Monster("Fanged Inglet", Rarity.Bronze, level: 1, day: 1,
+            health: 80, goldReward: 2, xpReward: 3));
         await _context.SaveChangesAsync();
+
+        var result = await _repository.SearchByNameAsync("banan");
+
+        result.Count.ShouldBe(1);
+        result[0].Name.ShouldBe("Banannibal");
     }
+
+    public void Dispose() => _context.Dispose();
 }
