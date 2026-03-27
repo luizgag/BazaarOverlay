@@ -19,6 +19,7 @@ public class BazaarDbContext : DbContext
     public DbSet<Trainer> Trainers => Set<Trainer>();
     public DbSet<Event> Events => Set<Event>();
     public DbSet<EventOption> EventOptions => Set<EventOption>();
+    public DbSet<CardUrlCache> CardUrlCaches => Set<CardUrlCache>();
 
     public BazaarDbContext(DbContextOptions<BazaarDbContext> options) : base(options) { }
 
@@ -104,6 +105,11 @@ public class BazaarDbContext : DbContext
                 .WithOne(o => o.Event)
                 .HasForeignKey(o => o.EventId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<CardUrlCache>(entity =>
+        {
+            entity.HasIndex(e => e.Name).IsUnique();
         });
     }
 }
