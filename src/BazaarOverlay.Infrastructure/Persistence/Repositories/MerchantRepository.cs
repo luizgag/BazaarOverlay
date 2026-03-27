@@ -4,30 +4,32 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BazaarOverlay.Infrastructure.Persistence.Repositories;
 
-public class MonsterRepository : IMonsterRepository
+public class MerchantRepository : IMerchantRepository
 {
     private readonly BazaarDbContext _context;
 
-    public MonsterRepository(BazaarDbContext context)
+    public MerchantRepository(BazaarDbContext context)
     {
         _context = context;
     }
 
-    public async Task<Monster?> GetByNameAsync(string name)
+    public async Task<Merchant?> GetByNameAsync(string name)
     {
-        return await FullQuery()
+        return await _context.Merchants
+            .Include(m => m.ItemPool)
             .FirstOrDefaultAsync(m => m.Name == name);
     }
 
-    public async Task<IReadOnlyList<Monster>> SearchByNameAsync(string partialName)
+    public async Task<IReadOnlyList<Merchant>> SearchByNameAsync(string partialName)
     {
         var lower = partialName.ToLower();
 
-        var monsters = await FullQuery()
+        var merchants = await _context.Merchants
+            .Include(m => m.ItemPool)
             .Where(m => m.Name.ToLower().Contains(lower))
             .ToListAsync();
 
-        return monsters
+        return merchants
             .OrderBy(m => m.Name.Equals(partialName, StringComparison.OrdinalIgnoreCase) ? 0
                         : m.Name.StartsWith(partialName, StringComparison.OrdinalIgnoreCase) ? 1
                         : 2)
@@ -35,23 +37,9 @@ public class MonsterRepository : IMonsterRepository
             .ToList();
     }
 
-    public async Task<IReadOnlyList<Monster>> GetByDayAsync(int day)
+    public async Task AddAsync(Merchant merchant)
     {
-        return await FullQuery()
-            .Where(m => m.Day <= day)
-            .ToListAsync();
-    }
-
-    public async Task AddAsync(Monster monster)
-    {
-        await _context.Monsters.AddAsync(monster);
+        await _context.Merchants.AddAsync(merchant);
         await _context.SaveChangesAsync();
-    }
-
-    private IQueryable<Monster> FullQuery()
-    {
-        return _context.Monsters
-            .Include(m => m.BoardItems)
-            .Include(m => m.BoardSkills);
     }
 }
