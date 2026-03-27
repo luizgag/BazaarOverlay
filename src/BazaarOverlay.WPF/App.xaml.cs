@@ -4,11 +4,17 @@ using System.Windows;
 using Microsoft.Extensions.Logging;
 using BazaarOverlay.Application.Interfaces;
 using BazaarOverlay.Application.Services;
+using BazaarOverlay.Application.ViewModels;
 using BazaarOverlay.Domain.Interfaces;
 using BazaarOverlay.Infrastructure.DataImport;
+using BazaarOverlay.Infrastructure.Ocr;
 using BazaarOverlay.Infrastructure.Persistence;
 using BazaarOverlay.Infrastructure.Persistence.Repositories;
+using BazaarOverlay.Infrastructure.Playwright;
+using BazaarOverlay.Infrastructure.ScreenCapture;
+using BazaarOverlay.WPF.Services;
 using BazaarOverlay.WPF.ViewModels;
+using BazaarOverlay.WPF.Views;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -51,6 +57,21 @@ public partial class App : System.Windows.Application
 
         var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
         mainWindow.Show();
+
+        // Set up global hotkey
+        var hotkeyService = _serviceProvider.GetRequiredService<HotkeyService>();
+        var windowHandle = new System.Windows.Interop.WindowInteropHelper(mainWindow).Handle;
+        hotkeyService.Register(windowHandle);
+        hotkeyService.HotkeyPressed += async () =>
+        {
+            var orchestrator = _serviceProvider.GetRequiredService<IOverlayOrchestrator>();
+            await orchestrator.HandleHotkeyAsync();
+        };
+
+        // Pre-create overlay window (hidden)
+        _serviceProvider.GetRequiredService<CardOverlayWindow>();
+
+        _logger.LogInformation("Overlay hotkey (Ctrl+D) registered");
     }
 
     private static void ConfigureServices(IServiceCollection services)
@@ -71,6 +92,7 @@ public partial class App : System.Windows.Application
         services.AddScoped<ISkillRepository, SkillRepository>();
         services.AddScoped<IRarityDayProbabilityRepository, RarityDayProbabilityRepository>();
         services.AddScoped<IEncounterRepository, EncounterRepository>();
+        services.AddScoped<ICardUrlCacheRepository, CardUrlCacheRepository>();
 
         // Application services
         services.AddSingleton<IGameSessionService, GameSessionService>();
@@ -80,6 +102,11 @@ public partial class App : System.Windows.Application
         services.AddScoped<IShopService, ShopService>();
         services.AddScoped<IEncounterService, EncounterService>();
         services.AddScoped<IDataImportService, DataImportService>();
+        services.AddScoped<ITooltipNameExtractor, TooltipNameExtractor>();
+        services.AddScoped<IScreenCaptureService, ScreenCaptureService>();
+        services.AddScoped<IOcrService, WindowsOcrService>();
+        services.AddScoped<IBazaarDbLookupService, BazaarDbLookupService>();
+        services.AddScoped<IOverlayOrchestrator, OverlayOrchestrator>();
         services.AddHttpClient();
         services.AddLogging(builder =>
         {
@@ -88,6 +115,15 @@ public partial class App : System.Windows.Application
             builder.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning);
         });
         services.AddTransient<BazaarPlannerImporter>();
+
+        // Playwright services (long-lived browser)
+        services.AddSingleton<IPlaywrightBrowserManager, PlaywrightBrowserManager>();
+        services.AddSingleton<IPlaywrightSearchService, PlaywrightSearchService>();
+
+        // Overlay components
+        services.AddSingleton<CardOverlayViewModel>();
+        services.AddSingleton<CardOverlayWindow>();
+        services.AddSingleton<HotkeyService>();
 
         // ViewModels
         services.AddTransient<MainViewModel>();
@@ -101,6 +137,8 @@ public partial class App : System.Windows.Application
     protected override void OnExit(ExitEventArgs e)
     {
         _logger?.LogInformation("BazaarOverlay shutting down");
+        if (_serviceProvider?.GetService<IPlaywrightBrowserManager>() is IAsyncDisposable browserManager)
+            browserManager.DisposeAsync().AsTask().GetAwaiter().GetResult();
         _serviceProvider?.Dispose();
         base.OnExit(e);
     }
